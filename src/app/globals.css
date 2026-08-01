@@ -6,24 +6,12 @@
 
 @theme {
   /* Colors */
-  --color-primary: #C2820D;
+  --color-primary: #FF6D29;
+  --color-secondary: #453027;
 
-  --color-background: #F8F8F8;
-  --color-surface: #FFFFFF;
-  --color-border: #E5E7EB;
-
-  --color-foreground: #0F172A;
-  --color-muted: #64748B;
-
-  --color-success: #16A34A;
-  --color-warning: #F59E0B;
-  --color-error: #DC2626;
-
-  /* Radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.25rem;
+  --color-background: #161316;
+  --color-neutral: #BABABA;
+  --color-white: #FFFFFF;
 
   /* Fonts */
   --font-heading: var(--font-heading);
@@ -42,7 +30,7 @@
   body {
     min-height: 100vh;
     background: var(--color-background);
-    color: var(--color-foreground);
+    color: var(--color-white);
     font-family: var(--font-body);
 
     overflow-x: hidden;
@@ -75,5 +63,5 @@
 
 ::selection {
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-white);
 }
