@@ -9,8 +9,8 @@ interface HelpModalProps {
 }
 
 // PLACEHOLDER — replace with the real LogsCity WhatsApp business number
-const WHATSAPP_NUMBER = '2340000000000';
-const WHATSAPP_MESSAGE = "Hi, I need help with LogsCity.";
+const WHATSAPP_NUMBER = '+2349128054985';
+const WHATSAPP_MESSAGE = "Hi, I need help with ...";
 
 export function HelpModal({ isOpen, onClose }: HelpModalProps) {
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
