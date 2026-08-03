@@ -17,17 +17,16 @@ export async function FeaturedListings() {
   }
 
   if (!categories || categories.length === 0) {
-    return null; // nothing featured yet — section just doesn't render
+    return null;
   }
 
-  // availableCount is computed, not stored — one count query per category
   const products: ProductCardData[] = await Promise.all(
     categories.map(async (category) => {
+      // Query the public view, not `accounts` directly — accounts is RLS-locked to admins only
       const { count } = await supabase
-        .from('accounts')
+        .from('available_accounts')
         .select('*', { count: 'exact', head: true })
-        .eq('category_id', category.id)
-        .eq('status', 'available');
+        .eq('category_id', category.id);
 
       return {
         id: category.id,
