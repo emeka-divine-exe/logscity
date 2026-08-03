@@ -4,7 +4,7 @@ import { Button } from '@/components/ui';
 
 export function Hero() {
   return (
-    <section id="hero" className="px-4 py-16 sm:px-6 sm:py-24">
+    <section id="hero" className="overflow-x-hidden px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
         {/* Left — content */}
         <div>
@@ -28,7 +28,6 @@ export function Hero() {
             </Link>
           </div>
 
-          {/* Stats — placeholder numbers, replace with real figures */}
           <div className="mt-12 flex gap-10">
             <div>
               <p className="text-2xl font-bold text-white">500+</p>
@@ -46,10 +45,10 @@ export function Hero() {
         </div>
 
         {/* Right — photo with floating platform icons */}
-        <div className="relative mx-auto w-full max-w-sm">
+        <div className="relative mx-auto w-full max-w-sm px-6 sm:px-0">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
             <Image
-              src="/images/hero-person.png"
+              src="/images/hero-person.jpg"
               alt="LogsCity customer"
               fill
               className="object-cover"
@@ -57,13 +56,13 @@ export function Hero() {
             />
           </div>
 
-          {/* Floating platform icons — 3D glossy style, decorative, from public/images/ */}
+          {/* Floating platform icons — pulled inward on mobile to avoid overflow, wider offsets from sm: up */}
           <Image
             src="/images/facebook-icon.png"
             alt="Facebook"
             width={72}
             height={72}
-            className="absolute -left-6 top-8"
+            className="absolute -left-2 top-8 sm:-left-6"
           />
 
           <Image
@@ -71,7 +70,7 @@ export function Hero() {
             alt="Instagram"
             width={56}
             height={56}
-            className="absolute -right-6 top-1/3"
+            className="absolute -right-2 top-1/3 sm:-right-6"
           />
 
           <Image
@@ -79,10 +78,10 @@ export function Hero() {
             alt="TikTok"
             width={56}
             height={56}
-            className="absolute -bottom-6 left-1/4"
+            className="absolute -bottom-2 left-1/4 sm:-bottom-6"
           />
         </div>
       </div>
     </section>
   );
-            }
+}
