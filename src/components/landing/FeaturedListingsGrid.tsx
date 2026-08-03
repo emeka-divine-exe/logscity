@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ProductCard, type ProductCardData } from '@/components/store';
+import { AccountSelectionModal } from '@/components/modals';
 
 interface FeaturedListingsGridProps {
   products: ProductCardData[];
@@ -22,7 +23,10 @@ export function FeaturedListingsGrid({ products }: FeaturedListingsGridProps) {
         ))}
       </div>
 
-      {/* AccountSelectionModal not built yet — will render here, driven by selectedCategoryId */}
+      <AccountSelectionModal
+        categoryId={selectedCategoryId}
+        onClose={() => setSelectedCategoryId(null)}
+      />
     </>
   );
 }
