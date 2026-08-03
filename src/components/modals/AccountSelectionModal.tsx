@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Modal, Button } from '@/components/ui';
+import { Modal, Button, Spinner, EmptyState } from '@/components/ui';
 import { Icon } from '@iconify/react';
 
 interface AvailableAccount {
@@ -90,10 +90,18 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
         </div>
       }
     >
-      {isLoading && <p className="text-sm text-neutral">Loading accounts...</p>}
+      {isLoading && (
+        <div className="flex items-center justify-center py-8">
+          <Spinner />
+        </div>
+      )}
 
       {!isLoading && accounts.length === 0 && (
-        <p className="text-sm text-neutral">No accounts currently available in this category.</p>
+        <EmptyState
+          icon="lucide:package-x"
+          title="No accounts available"
+          description="This category is currently out of stock. Check back soon."
+        />
       )}
 
       <div className="flex flex-col gap-3">
