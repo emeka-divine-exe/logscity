@@ -48,7 +48,7 @@ export function Hero() {
         <div className="relative mx-auto w-full max-w-sm px-6 sm:px-0">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
             <Image
-              src="/images/hero-person.jpg"
+              src="/images/hero-person.png"
               alt="LogsCity customer"
               fill
               className="object-cover"
