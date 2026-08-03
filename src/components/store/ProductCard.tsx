@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils';
 
 export interface ProductCardData {
   id: string;
-  platform: string; // comes straight from categories.platform in the DB — no fixed set
-  title: string;
-  tags: string[];
+  platform: string; // from categories.platform — no fixed set
+  name: string;
+  description: string | null;
   price: number;
   availableCount: number;
 }
@@ -22,12 +22,10 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onChooseAccounts, className }: ProductCardProps) {
-  const { id, platform, title, tags, price, availableCount } = product;
+  const { id, platform, name, description, price, availableCount } = product;
   const isOutOfStock = availableCount === 0;
   const [iconFailed, setIconFailed] = useState(false);
 
-  // Icon path is derived from the platform string itself, e.g. "facebook" -> /platforms/facebook.png
-  // Any new platform added in the DB just needs a matching file dropped into public/platforms/
   const iconSrc = `/platforms/${platform.toLowerCase()}.png`;
 
   return (
@@ -37,7 +35,6 @@ export function ProductCard({ product, onChooseAccounts, className }: ProductCar
         className
       )}
     >
-      {/* Platform icon + title */}
       <div className="flex items-center gap-3">
         <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-white/10">
           {iconFailed ? (
@@ -55,24 +52,13 @@ export function ProductCard({ product, onChooseAccounts, className }: ProductCar
             />
           )}
         </div>
-        <h3 className="text-base font-semibold text-white">{title}</h3>
+        <h3 className="text-base font-semibold text-white">{name}</h3>
       </div>
 
-      {/* Tags */}
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-lg bg-white/10 px-2.5 py-1 text-xs text-neutral"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+      {description && (
+        <p className="line-clamp-2 text-sm text-neutral">{description}</p>
       )}
 
-      {/* Price + availability */}
       <div className="flex items-center justify-between text-sm">
         <span className="text-lg font-bold text-white">
           ₦{price.toLocaleString()}
@@ -82,7 +68,6 @@ export function ProductCard({ product, onChooseAccounts, className }: ProductCar
         </span>
       </div>
 
-      {/* CTA */}
       <Button
         variant="primary"
         size="sm"
@@ -95,4 +80,4 @@ export function ProductCard({ product, onChooseAccounts, className }: ProductCar
       </Button>
     </div>
   );
-      }
+}
