@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Syne, Urbanist } from 'next/font/google';
+import { ThemeProvider } from '@/lib/theme/ThemeProvider';
 import './globals.css';
 
 const syne = Syne({
@@ -24,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${syne.variable} ${urbanist.variable} bg-background font-body text-white antialiased`}>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );
