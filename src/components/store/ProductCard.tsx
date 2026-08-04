@@ -1,87 +1,75 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { Icon } from '@iconify/react';
-import { Button } from '@/components/ui';
-import { cn } from '@/lib/utils';
+import { useMemo, useState } from 'react';
+import { ProductCard, type ProductCardData } from './ProductCard';
+import { AccountSelectionModal } from '@/components/modals';
+import { SearchBar } from '@/components/shared';
+import { EmptyState } from '@/components/ui';
 
-export interface ProductCardData {
-  id: string;
-  platform: string;
-  name: string;
-  description: string | null;
-  price: number;
-  availableCount: number;
-  requiresSelection: boolean;
+interface StoreGridProps {
+  products: ProductCardData[];
 }
 
-interface ProductCardProps {
-  product: ProductCardData;
-  onChooseAccounts: (productId: string) => void;
-  className?: string;
-}
+export function StoreGrid({ products }: StoreGridProps) {
+  const [search, setSearch] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-export function ProductCard({ product, onChooseAccounts, className }: ProductCardProps) {
-  const { id, platform, name, description, price, availableCount, requiresSelection } = product;
-  const isOutOfStock = availableCount === 0;
-  const [iconFailed, setIconFailed] = useState(false);
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return products;
+    return products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(term) ||
+        p.platform.toLowerCase().includes(term) ||
+        (p.description ?? '').toLowerCase().includes(term)
+    );
+  }, [search, products]);
 
-  const iconSrc = `/platforms/${platform.toLowerCase()}.png`;
+  const grouped = useMemo(() => {
+    const groups: Record<string, ProductCardData[]> = {};
+    for (const product of filtered) {
+      const key = product.platform;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(product);
+    }
+    return groups;
+  }, [filtered]);
+
+  const platforms = Object.keys(grouped);
 
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/5 p-5',
-        className
-      )}
-    >
-      <div className="flex items-center gap-3">
-        <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-white/10">
-          {iconFailed ? (
-            <Icon
-              icon="lucide:globe"
-              className="absolute inset-0 m-auto text-lg text-neutral"
-            />
-          ) : (
-            <Image
-              src={iconSrc}
-              alt={platform}
-              fill
-              className="object-contain p-1.5"
-              onError={() => setIconFailed(true)}
-            />
-          )}
+    <>
+      <SearchBar value={search} onChange={setSearch} className="mt-8 max-w-md" />
+
+      {platforms.length === 0 && (
+        <div className="mt-12">
+          <EmptyState
+            icon="lucide:search-x"
+            title="No products found"
+            description="Try a different search term."
+          />
         </div>
-        <h3 className="text-base font-semibold text-white">{name}</h3>
-      </div>
-
-      {description && (
-        <p className="line-clamp-2 text-sm text-neutral">{description}</p>
       )}
 
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-lg font-bold text-white">
-          ₦{price.toLocaleString()}
-        </span>
-        <span className={cn('text-neutral', isOutOfStock && 'text-red-500')}>
-          {isOutOfStock ? 'Out of stock' : `${availableCount} Available`}
-        </span>
-      </div>
+      {platforms.map((platform) => (
+        <div key={platform} className="mt-12">
+          <h2 className="text-xl font-semibold capitalize text-white">{platform}</h2>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {grouped[platform].map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onChooseAccounts={setSelectedCategoryId}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
 
-      <Button
-        variant="primary"
-        size="sm"
-        disabled={isOutOfStock}
-        onClick={() => onChooseAccounts(id)}
-        className="w-full"
-      >
-        <Icon
-          icon={requiresSelection ? 'lucide:list-checks' : 'lucide:shopping-cart'}
-          className="mr-2 text-base"
-        />
-        {requiresSelection ? 'Choose Accounts' : 'Buy Now'}
-      </Button>
-    </div>
+      <AccountSelectionModal
+        categoryId={selectedCategoryId}
+        onClose={() => setSelectedCategoryId(null)}
+      />
+    </>
   );
 }
