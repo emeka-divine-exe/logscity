@@ -193,4 +193,4 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
       )}
     </Modal>
   );
-        }
+}
