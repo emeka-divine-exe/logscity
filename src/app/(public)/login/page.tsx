@@ -1,10 +1,10 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { LoginForm } from '@/components/forms';
 
 export default function LoginPage() {
   return (
     <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden px-4 py-16 sm:px-6">
-      {/* Brand-colored glow behind the card */}
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 h-[400px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25 blur-[100px]"
@@ -21,7 +21,9 @@ export default function LoginPage() {
         <p className="mt-1 text-sm text-neutral">Log in to your LogsCity account.</p>
 
         <div className="mt-8">
-          <LoginForm />
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
         </div>
 
         <p className="mt-6 text-center text-sm text-neutral">
