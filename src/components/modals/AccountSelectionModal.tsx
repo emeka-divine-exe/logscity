@@ -7,7 +7,7 @@ import { Icon } from '@iconify/react';
 
 interface AvailableAccount {
   id: string;
-  profile_url: string;
+  profile_url: string | null;
 }
 
 interface CategoryInfo {
@@ -146,16 +146,18 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
                 />
                 <span className="text-sm text-white">Account</span>
               </div>
-              <a
-                href={account.profile_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm text-primary"
-                onClick={(e) => e.stopPropagation()}
-              >
-                View Account
-                <Icon icon="lucide:external-link" className="text-xs" />
-              </a>
+              {account.profile_url && (
+                <a
+                  href={account.profile_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-sm text-primary"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  View Account
+                  <Icon icon="lucide:external-link" className="text-xs" />
+                </a>
+              )}
             </label>
           ))}
         </div>
@@ -193,4 +195,4 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
       )}
     </Modal>
   );
-}
+          }
