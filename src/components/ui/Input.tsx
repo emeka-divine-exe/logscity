@@ -20,7 +20,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <div className="relative flex items-center">
           <Icon
             icon={icon}
-            className="absolute left-4 top-4 text-neutral text-lg pointer-events-none"
+            className="absolute left-4 bottom-4 text-neutral text-lg pointer-events-none"
           />
           <input
             ref={ref}
