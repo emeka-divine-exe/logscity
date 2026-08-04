@@ -7,7 +7,7 @@ export async function FeaturedListings() {
 
   const { data: categories, error } = await supabase
     .from('categories')
-    .select('id, name, platform, description, price')
+    .select('id, name, platform, description, price, requires_selection')
     .eq('featured', true)
     .order('created_at', { ascending: false });
 
@@ -22,7 +22,6 @@ export async function FeaturedListings() {
 
   const products: ProductCardData[] = await Promise.all(
     categories.map(async (category) => {
-      // Query the public view, not `accounts` directly — accounts is RLS-locked to admins only
       const { count } = await supabase
         .from('available_accounts')
         .select('*', { count: 'exact', head: true })
@@ -35,6 +34,7 @@ export async function FeaturedListings() {
         description: category.description,
         price: Number(category.price),
         availableCount: count ?? 0,
+        requiresSelection: category.requires_selection,
       };
     })
   );
