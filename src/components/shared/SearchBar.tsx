@@ -1,0 +1,22 @@
+'use client';
+
+import { Input } from '@/components/ui';
+
+interface SearchBarProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+export function SearchBar({ value, onChange, placeholder = 'Search products...', className }: SearchBarProps) {
+  return (
+    <Input
+      icon="lucide:search"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={className}
+    />
+  );
+}
