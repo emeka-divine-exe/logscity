@@ -8,11 +8,12 @@ import { cn } from '@/lib/utils';
 
 export interface ProductCardData {
   id: string;
-  platform: string; // from categories.platform — no fixed set
+  platform: string;
   name: string;
   description: string | null;
   price: number;
   availableCount: number;
+  requiresSelection: boolean;
 }
 
 interface ProductCardProps {
@@ -22,7 +23,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onChooseAccounts, className }: ProductCardProps) {
-  const { id, platform, name, description, price, availableCount } = product;
+  const { id, platform, name, description, price, availableCount, requiresSelection } = product;
   const isOutOfStock = availableCount === 0;
   const [iconFailed, setIconFailed] = useState(false);
 
@@ -75,8 +76,11 @@ export function ProductCard({ product, onChooseAccounts, className }: ProductCar
         onClick={() => onChooseAccounts(id)}
         className="w-full"
       >
-        <Icon icon="lucide:list-checks" className="mr-2 text-base" />
-        Choose Accounts
+        <Icon
+          icon={requiresSelection ? 'lucide:list-checks' : 'lucide:shopping-cart'}
+          className="mr-2 text-base"
+        />
+        {requiresSelection ? 'Choose Accounts' : 'Buy Now'}
       </Button>
     </div>
   );
