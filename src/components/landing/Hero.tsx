@@ -1,8 +1,14 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui';
+import { useTheme } from '@/lib/theme/ThemeProvider';
 
 export function Hero() {
+  const { theme } = useTheme();
+  const heroImageSrc = theme === 'light' ? '/images/hero-person-light.png' : '/images/hero-person-dark.png';
+
   return (
     <section id="hero" className="overflow-x-hidden px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
@@ -44,41 +50,15 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Right — photo with floating platform icons */}
-        <div className="relative mx-auto w-full max-w-sm px-6 sm:px-0">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
-            <Image
-              src="/images/hero-person.png"
-              alt="LogsCity customer"
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-
-          {/* Floating platform icons — pulled inward on mobile to avoid overflow, wider offsets from sm: up */}
+        {/* Right — photo, icons baked into the composited image itself, swaps by theme */}
+        <div className="relative mx-auto w-full max-w-sm">
           <Image
-            src="/images/facebook-icon.png"
-            alt="Facebook"
-            width={72}
-            height={72}
-            className="absolute -left-2 top-8 sm:-left-6"
-          />
-
-          <Image
-            src="/images/instagram-icon.png"
-            alt="Instagram"
-            width={56}
-            height={56}
-            className="absolute -right-2 top-1/3 sm:-right-6"
-          />
-
-          <Image
-            src="/images/tiktok-icon.png"
-            alt="TikTok"
-            width={56}
-            height={56}
-            className="absolute -bottom-2 left-1/4 sm:-bottom-6"
+            src={heroImageSrc}
+            alt="LogsCity customer"
+            width={500}
+            height={500}
+            className="w-full rounded-2xl"
+            priority
           />
         </div>
       </div>
