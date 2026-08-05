@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Modal, Button, Spinner, EmptyState } from '@/components/ui';
 import { Icon } from '@iconify/react';
@@ -22,13 +24,31 @@ interface AccountSelectionModalProps {
   onClose: () => void;
 }
 
+declare global {
+  interface Window {
+    PaystackPop: {
+      setup: (options: {
+        key: string;
+        email: string;
+        amount: number;
+        ref: string;
+        currency: string;
+        onClose: () => void;
+        callback: (response: { reference: string }) => void;
+      }) => { openIframe: () => void };
+    };
+  }
+}
+
 export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionModalProps) {
+  const router = useRouter();
   const [category, setCategory] = useState<CategoryInfo | null>(null);
   const [accounts, setAccounts] = useState<AvailableAccount[]>([]);
   const [availableCount, setAvailableCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [quantity, setQuantity] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (!categoryId) {
@@ -92,8 +112,80 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
   const count = requiresSelection ? selectedIds.size : quantity;
   const total = category ? category.price * count : 0;
 
-  function handleProceedToPayment() {
-    // Paystack not wired yet — placeholder for next build step
+  async function handleProceedToPayment() {
+    if (!category || count === 0) return;
+
+    setIsProcessing(true);
+
+    try {
+      // Get current user email for Paystack
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error('Please log in to continue');
+        router.push('/login?redirect=/store');
+        return;
+      }
+
+      // Initialize order server-side
+      const initRes = await fetch('/api/checkout/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          categoryId: category.id,
+          accountIds: requiresSelection ? Array.from(selectedIds) : null,
+          quantity: requiresSelection ? null : quantity,
+        }),
+      });
+
+      const initData = await initRes.json();
+
+      if (!initRes.ok) {
+        toast.error(initData.error || 'Failed to initialize payment');
+        setIsProcessing(false);
+        return;
+      }
+
+      // Open Paystack popup
+      const handler = window.PaystackPop.setup({
+        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+        email: initData.email,
+        amount: initData.amount,
+        ref: initData.reference,
+        currency: 'NGN',
+        onClose: () => {
+          setIsProcessing(false);
+          toast.error('Payment cancelled');
+        },
+        callback: async (response) => {
+          // Verify payment server-side
+          const verifyRes = await fetch('/api/checkout/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: response.reference }),
+          });
+
+          const verifyData = await verifyRes.json();
+
+          if (verifyRes.ok && verifyData.success) {
+            toast.success('Payment successful! Redirecting to your order...');
+            onClose();
+            router.push(`/orders`);
+          } else {
+            toast.error(verifyData.error || 'Payment verification failed');
+            setIsProcessing(false);
+          }
+        },
+      });
+
+      handler.openIframe();
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('Something went wrong. Please try again.');
+      setIsProcessing(false);
+    }
   }
 
   return (
@@ -110,7 +202,12 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
             </p>
             <p className="text-lg font-bold text-white">₦{total.toLocaleString()}</p>
           </div>
-          <Button variant="primary" disabled={count === 0} onClick={handleProceedToPayment}>
+          <Button
+            variant="primary"
+            disabled={count === 0 || isProcessing}
+            isLoading={isProcessing}
+            onClick={handleProceedToPayment}
+          >
             Proceed to Payment
           </Button>
         </div>
@@ -195,4 +292,4 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
       )}
     </Modal>
   );
-          }
+                          }
