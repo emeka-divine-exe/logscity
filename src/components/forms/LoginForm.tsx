@@ -49,7 +49,7 @@ export function LoginForm() {
     }
 
     toast.success('Welcome back');
-    const redirectTo = searchParams.get('redirect') || '/store';
+    const redirectTo = searchParams.get('redirect') || '/dashboard';
     router.push(redirectTo);
   }
 
