@@ -113,80 +113,82 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
   const total = category ? category.price * count : 0;
 
   async function handleProceedToPayment() {
-    if (!category || count === 0) return;
+  if (!category || count === 0) return;
 
-    setIsProcessing(true);
-
-    try {
-      // Get current user email for Paystack
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error('Please log in to continue');
-        router.push('/login?redirect=/store');
-        return;
-      }
-
-      // Initialize order server-side
-      const initRes = await fetch('/api/checkout/initialize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          categoryId: category.id,
-          accountIds: requiresSelection ? Array.from(selectedIds) : null,
-          quantity: requiresSelection ? null : quantity,
-        }),
-      });
-
-      const initData = await initRes.json();
-
-      if (!initRes.ok) {
-        toast.error(initData.error || 'Failed to initialize payment');
-        setIsProcessing(false);
-        return;
-      }
-
-      // Open Paystack popup
-      const handler = window.PaystackPop.setup({
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-        email: initData.email,
-        amount: initData.amount,
-        ref: initData.reference,
-        currency: 'NGN',
-        onClose: () => {
-          setIsProcessing(false);
-          toast.error('Payment cancelled');
-        },
-        callback: async (response) => {
-          // Verify payment server-side
-          const verifyRes = await fetch('/api/checkout/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reference: response.reference }),
-          });
-
-          const verifyData = await verifyRes.json();
-
-          if (verifyRes.ok && verifyData.success) {
-            toast.success('Payment successful! Redirecting to your order...');
-            onClose();
-            router.push(`/orders`);
-          } else {
-            toast.error(verifyData.error || 'Payment verification failed');
-            setIsProcessing(false);
-          }
-        },
-      });
-
-      handler.openIframe();
-
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast.error('Something went wrong. Please try again.');
-      setIsProcessing(false);
-    }
+  // Check Paystack script is loaded
+  if (typeof window === 'undefined' || !window.PaystackPop) {
+    toast.error('Payment system is loading. Please try again in a moment.');
+    return;
   }
+
+  setIsProcessing(true);
+
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      toast.error('Please log in to continue');
+      router.push('/login?redirect=/store');
+      return;
+    }
+
+    const initRes = await fetch('/api/checkout/initialize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        categoryId: category.id,
+        accountIds: requiresSelection ? Array.from(selectedIds) : null,
+        quantity: requiresSelection ? null : quantity,
+      }),
+    });
+
+    const initData = await initRes.json();
+
+    if (!initRes.ok) {
+      toast.error(initData.error || 'Failed to initialize payment');
+      setIsProcessing(false);
+      return;
+    }
+
+    const handler = window.PaystackPop.setup({
+      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+      email: initData.email,
+      amount: initData.amount,
+      ref: initData.reference,
+      currency: 'NGN',
+      onClose: () => {
+        setIsProcessing(false);
+        toast.error('Payment cancelled');
+      },
+      callback: async (response) => {
+        const verifyRes = await fetch('/api/checkout/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: response.reference }),
+        });
+
+        const verifyData = await verifyRes.json();
+
+        if (verifyRes.ok && verifyData.success) {
+          toast.success('Payment successful! Redirecting to your order...');
+          onClose();
+          router.push('/orders');
+        } else {
+          toast.error(verifyData.error || 'Payment verification failed');
+          setIsProcessing(false);
+        }
+      },
+    });
+
+    handler.openIframe();
+
+  } catch (error) {
+    console.error('Payment error:', error);
+    toast.error('Something went wrong. Please try again.');
+    setIsProcessing(false);
+  }
+          }
 
   return (
     <Modal
