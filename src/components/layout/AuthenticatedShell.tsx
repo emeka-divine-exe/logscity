@@ -7,12 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from './Sidebar';
 import { HelpModal } from '@/components/modals';
 
-interface AuthenticatedShellProps {
-  userName: string;
-  children: React.ReactNode;
-}
-
-export function AuthenticatedShell({ userName, children }: AuthenticatedShellProps) {
+export function AuthenticatedShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
@@ -25,11 +20,7 @@ export function AuthenticatedShell({ userName, children }: AuthenticatedShellPro
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar
-        userName={userName}
-        onHelpClick={() => setIsHelpOpen(true)}
-        onLogout={handleLogout}
-      />
+      <Sidebar onHelpClick={() => setIsHelpOpen(true)} onLogout={handleLogout} />
       <main className="flex-1 px-4 py-8 sm:px-8">{children}</main>
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </div>
