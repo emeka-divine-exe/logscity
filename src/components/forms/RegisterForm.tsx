@@ -21,6 +21,7 @@ export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const {
     register,
@@ -32,6 +33,7 @@ export function RegisterForm() {
 
   async function onSubmit(values: RegisterFormValues) {
     setIsSubmitting(true);
+    setAuthError(null);
     const supabase = createClient();
 
     const { error } = await supabase.auth.signUp({
@@ -45,12 +47,12 @@ export function RegisterForm() {
     setIsSubmitting(false);
 
     if (error) {
-      toast.error(error.message);
+      setAuthError(error.message);
       return;
     }
 
     toast.success('Account created successfully');
-    const redirectTo = searchParams.get('redirect') || '/dashboard';
+    const redirectTo = searchParams.get('redirect') || '/store';
     router.push(redirectTo);
   }
 
@@ -76,9 +78,16 @@ export function RegisterForm() {
         error={errors.password?.message}
         {...register('password')}
       />
+
+      {authError && (
+        <p className="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          {authError}
+        </p>
+      )}
+
       <Button type="submit" variant="primary" isLoading={isSubmitting} className="mt-2">
         Create account
       </Button>
     </form>
   );
-        }
+}
