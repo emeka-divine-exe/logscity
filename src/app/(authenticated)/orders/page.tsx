@@ -11,7 +11,7 @@ export default async function OrdersPage() {
     .eq('auth_user_id', user!.id)
     .single();
 
-  const { data: orders } = await supabase
+  const { data: rawOrders } = await supabase
     .from('orders')
     .select(`
       id, total_amount, payment_status, created_at,
@@ -28,6 +28,16 @@ export default async function OrdersPage() {
     .eq('payment_status', 'success')
     .order('created_at', { ascending: false });
 
+  // Supabase returns nested relations as arrays by default — normalize to single objects
+  // since each order_item has exactly one account and one category
+  const orders = (rawOrders ?? []).map((order) => ({
+    ...order,
+    order_items: order.order_items.map((item) => ({
+      ...item,
+      accounts: Array.isArray(item.accounts) ? item.accounts[0] ?? null : item.accounts,
+    })),
+  }));
+
   return (
     <div>
       <h1
@@ -39,7 +49,7 @@ export default async function OrdersPage() {
       <p className="mt-1 text-sm text-neutral">Your purchases and account credentials.</p>
 
       <div className="mt-8">
-        <OrdersList orders={orders ?? []} />
+        <OrdersList orders={orders} />
       </div>
     </div>
   );
