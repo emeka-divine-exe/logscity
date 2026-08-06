@@ -108,6 +108,30 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
     });
   }
 
+  // Separate function for verifying — called from sync callback
+  function verifyPayment(reference: string) {
+    fetch('/api/checkout/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference }),
+    })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok && data.success) {
+          toast.success('Payment successful! Redirecting to your order...');
+          onClose();
+          router.push('/orders');
+        } else {
+          toast.error(data.error || 'Payment verification failed');
+          setIsProcessing(false);
+        }
+      })
+      .catch(() => {
+        toast.error('Verification failed. Please contact support.');
+        setIsProcessing(false);
+      });
+  }
+
   const requiresSelection = category?.requires_selection ?? true;
   const count = requiresSelection ? selectedIds.size : quantity;
   const total = category ? category.price * count : 0;
@@ -170,28 +194,9 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
             setIsProcessing(false);
             toast.error('Payment cancelled');
           },
-          callback: async (response) => {
-            try {
-              const verifyRes = await fetch('/api/checkout/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reference: response.reference }),
-              });
-
-              const verifyData = await verifyRes.json();
-
-              if (verifyRes.ok && verifyData.success) {
-                toast.success('Payment successful! Redirecting to your order...');
-                onClose();
-                router.push('/orders');
-              } else {
-                toast.error(verifyData.error || 'Payment verification failed');
-                setIsProcessing(false);
-              }
-            } catch {
-              toast.error('Verification failed. Please contact support.');
-              setIsProcessing(false);
-            }
+          // Must be a plain sync function — Paystack v1 doesn't accept async callbacks
+          callback: (response: { reference: string }) => {
+            verifyPayment(response.reference);
           },
         });
 
@@ -314,4 +319,4 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
       )}
     </Modal>
   );
-}
+    }
