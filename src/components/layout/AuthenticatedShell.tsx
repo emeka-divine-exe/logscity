@@ -19,7 +19,7 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col md:flex-row">
       <Sidebar onHelpClick={() => setIsHelpOpen(true)} onLogout={handleLogout} />
       <main className="flex-1 px-4 py-8 sm:px-8">{children}</main>
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
