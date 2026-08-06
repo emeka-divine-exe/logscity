@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Input, Button } from '@/components/ui';
+import Link from 'next/link';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Enter your full name'),
@@ -22,6 +23,7 @@ export function RegisterForm() {
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [emailExists, setEmailExists] = useState(false);
 
   const {
     register,
@@ -34,9 +36,10 @@ export function RegisterForm() {
   async function onSubmit(values: RegisterFormValues) {
     setIsSubmitting(true);
     setAuthError(null);
+    setEmailExists(false);
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
@@ -48,6 +51,13 @@ export function RegisterForm() {
 
     if (error) {
       setAuthError(error.message);
+      return;
+    }
+
+    // Supabase silently succeeds on duplicate email when confirmation is disabled
+    // but returns a user with an identities array that's empty
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      setEmailExists(true);
       return;
     }
 
@@ -79,6 +89,15 @@ export function RegisterForm() {
         {...register('password')}
       />
 
+      {emailExists && (
+        <p className="rounded-xl bg-amber-500/10 px-4 py-3 text-sm text-amber-400">
+          An account with this email already exists.{' '}
+          <Link href="/login" className="underline">
+            Log in instead
+          </Link>
+        </p>
+      )}
+
       {authError && (
         <p className="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {authError}
@@ -90,4 +109,4 @@ export function RegisterForm() {
       </Button>
     </form>
   );
-}
+      }
