@@ -62,7 +62,7 @@ export function RegisterForm() {
     }
 
     toast.success('Account created successfully');
-    const redirectTo = searchParams.get('redirect') || '/store';
+    const redirectTo = searchParams.get('redirect') || '/dashboard';
     router.push(redirectTo);
   }
 
