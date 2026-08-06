@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Syne, Urbanist } from 'next/font/google';
 import Script from 'next/script';
+import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
 import './globals.css';
 
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${syne.variable} ${urbanist.variable} bg-background font-body text-white antialiased`}>
         <ThemeProvider>{children}</ThemeProvider>
+        <Toaster position="top-center" richColors />
         <Script src="https://js.paystack.co/v1/inline.js" strategy="beforeInteractive" />
       </body>
     </html>
