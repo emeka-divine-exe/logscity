@@ -29,7 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${syne.variable} ${urbanist.variable} bg-background font-body text-white antialiased`}>
         <ThemeProvider>{children}</ThemeProvider>
         <Toaster position="top-center" richColors />
-        <Script src="https://js.paystack.co/v1/inline.js" strategy="beforeInteractive" />
+        <Script
+          src="https://js.paystack.co/v1/inline.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
