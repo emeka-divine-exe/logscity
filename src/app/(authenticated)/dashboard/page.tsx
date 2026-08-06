@@ -31,7 +31,9 @@ export default async function DashboardPage() {
       >
         Welcome back, {profile?.full_name ?? 'there'}
       </h1>
-      <p className="mt-1 text-sm text-neutral">Here's what's happening with your account.</p>
+      <p className="mt-1 text-sm text-neutral">
+        Here&apos;s what&apos;s happening with your account.
+      </p>
 
       <div className="mt-8 grid grid-cols-2 gap-4">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -80,4 +82,4 @@ export default async function DashboardPage() {
       </div>
     </div>
   );
-                  }
+}
