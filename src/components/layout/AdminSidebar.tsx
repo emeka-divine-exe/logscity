@@ -8,10 +8,8 @@ import { Logo } from '@/components/shared';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { label: 'Overview', href: '/admin', icon: 'lucide:layout-dashboard' },
-  { label: 'Categories', href: '/admin/categories', icon: 'lucide:folder' },
-  { label: 'Accounts', href: '/admin/accounts', icon: 'lucide:database' },
-  { label: 'Orders', href: '/admin/orders', icon: 'lucide:package' },
+  { label: 'Dashboard', href: '/admin', icon: 'lucide:layout-dashboard' },
+  { label: 'Available Accounts', href: '/admin/accounts', icon: 'lucide:package' },
 ];
 
 interface AdminSidebarProps {
@@ -43,21 +41,11 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
           </Link>
         );
       })}
-
-      <Link
-        href="/dashboard"
-        onClick={() => setIsOpen(false)}
-        className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral transition-colors duration-200 hover:bg-white/5 hover:text-white"
-      >
-        <Icon icon="lucide:arrow-left" className="text-lg" />
-        Back to Site
-      </Link>
     </>
   );
 
   return (
     <>
-      {/* Mobile top strip */}
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 md:hidden">
         <div className="flex items-center gap-2">
           <Logo />
@@ -74,7 +62,6 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
         </button>
       </div>
 
-      {/* Mobile drawer */}
       {isOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setIsOpen(false)} />
@@ -92,12 +79,21 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
 
             <NavLinks />
 
+            <Link
+              href="/dashboard"
+              onClick={() => setIsOpen(false)}
+              className="mt-auto flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral transition-colors duration-200 hover:bg-white/5 hover:text-white"
+            >
+              <Icon icon="lucide:arrow-left" className="text-lg" />
+              Back to Site
+            </Link>
+
             <button
               onClick={() => {
                 setIsOpen(false);
                 onLogout();
               }}
-              className="mt-auto flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-500 transition-colors duration-200 hover:bg-red-500/10"
+              className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-500 transition-colors duration-200 hover:bg-red-500/10"
             >
               <Icon icon="lucide:log-out" className="text-lg" />
               Logout
@@ -106,7 +102,6 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
         </div>
       )}
 
-      {/* Desktop persistent sidebar */}
       <aside className="sticky top-0 hidden h-screen w-64 flex-col gap-1 border-r border-white/10 p-4 md:flex">
         <div className="mb-6 flex items-center gap-2 px-2">
           <Logo />
@@ -117,9 +112,17 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
 
         <NavLinks />
 
+        <Link
+          href="/dashboard"
+          className="mt-auto flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral transition-colors duration-200 hover:bg-white/5 hover:text-white"
+        >
+          <Icon icon="lucide:arrow-left" className="text-lg" />
+          Back to Site
+        </Link>
+
         <button
           onClick={onLogout}
-          className="mt-auto flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-500 transition-colors duration-200 hover:bg-red-500/10"
+          className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-500 transition-colors duration-200 hover:bg-red-500/10"
         >
           <Icon icon="lucide:log-out" className="text-lg" />
           Logout
@@ -127,4 +130,4 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
       </aside>
     </>
   );
-          }
+}
