@@ -5,7 +5,7 @@
 ========================================================== */
 
 @theme {
-  /* Colors */
+  /* Colors — dark mode is the default */
   --color-primary: #FF6D29;
   --color-secondary: #453027;
 
@@ -16,6 +16,19 @@
   /* Fonts */
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
+}
+
+/* ==========================================================
+   LIGHT MODE OVERRIDES
+   Applied when <html> has the "light" class.
+   Every component using bg-background / text-white / text-neutral
+   automatically follows these values — no component edits needed.
+========================================================== */
+
+.light {
+  --color-background: #FAFAFA;
+  --color-neutral: #6B6B6B;
+  --color-white: #17141A;
 }
 
 /* ==========================================================
@@ -34,6 +47,7 @@
     font-family: var(--font-body);
 
     overflow-x: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
 
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
