@@ -6,7 +6,13 @@ import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from './Sidebar';
 import { HelpModal, ConfirmationModal } from '@/components/modals';
 
-export function AuthenticatedShell({ children }: { children: React.ReactNode }) {
+export function AuthenticatedShell({
+  children,
+  isAdmin = false,
+}: {
+  children: React.ReactNode;
+  isAdmin?: boolean;
+}) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -16,7 +22,6 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
     const supabase = createClient();
     await supabase.auth.signOut();
     toast.success('Logged out');
-    // Hard redirect — guarantees a clean auth state everywhere, no stale UI
     window.location.href = '/';
   }
 
@@ -25,6 +30,7 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
       <Sidebar
         onHelpClick={() => setIsHelpOpen(true)}
         onLogout={() => setIsLogoutConfirmOpen(true)}
+        isAdmin={isAdmin}
       />
       <main className="flex-1 px-4 py-8 sm:px-8">{children}</main>
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
@@ -33,7 +39,7 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
         onClose={() => setIsLogoutConfirmOpen(false)}
         onConfirm={handleLogout}
         title="Log out?"
-        description="You'll need to log in again to access your dashboard and orders."
+        description="You will need to log in again to access your dashboard and orders."
         confirmLabel="Log Out"
         isLoading={isLoggingOut}
       />
