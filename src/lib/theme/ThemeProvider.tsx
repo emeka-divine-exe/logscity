@@ -23,6 +23,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Apply/remove the "light" class on <html> whenever theme changes
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.classList.add('light');
+    } else {
+      root.classList.remove('light');
+    }
+  }, [theme]);
+
   function setTheme(next: Theme) {
     setThemeState(next);
     localStorage.setItem(STORAGE_KEY, next);
