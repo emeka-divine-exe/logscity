@@ -122,10 +122,21 @@ export function CategoryFormModal({ isOpen, onClose, onSaved, editingCategory }:
       size="md"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <Input placeholder="Name (e.g. Facebook Accounts)" error={errors.name?.message} {...register('name')} />
-        <Input placeholder="Platform (e.g. facebook)" error={errors.platform?.message} {...register('platform')} />
+        <Input
+          icon="lucide:tag"
+          placeholder="Name (e.g. Facebook Accounts)"
+          error={errors.name?.message}
+          {...register('name')}
+        />
+        <Input
+          icon="lucide:globe"
+          placeholder="Platform (e.g. facebook)"
+          error={errors.platform?.message}
+          {...register('platform')}
+        />
         <Textarea placeholder="Description" error={errors.description?.message} {...register('description')} />
         <Input
+          icon="lucide:banknote"
           type="number"
           placeholder="Price (₦)"
           error={errors.price?.message}
