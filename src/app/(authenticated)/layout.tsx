@@ -10,5 +10,11 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
     redirect('/login?redirect=/dashboard');
   }
 
-  return <AuthenticatedShell>{children}</AuthenticatedShell>;
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('auth_user_id', user.id)
+    .single();
+
+  return <AuthenticatedShell isAdmin={profile?.role === 'admin'}>{children}</AuthenticatedShell>;
 }
