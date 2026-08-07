@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTheme } from '@/lib/theme/ThemeProvider';
 import { createClient } from '@/lib/supabase/client';
@@ -10,10 +9,19 @@ import { ConfirmationModal } from '@/components/modals';
 import { Icon } from '@iconify/react';
 
 export function SettingsClient() {
-  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    setIsLoggingOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    toast.success('Logged out');
+    window.location.href = '/';
+  }
 
   async function handleDeleteAccount() {
     setIsDeleting(true);
@@ -31,7 +39,7 @@ export function SettingsClient() {
       const supabase = createClient();
       await supabase.auth.signOut();
       toast.success('Account deleted');
-      router.push('/');
+      window.location.href = '/';
     } catch {
       toast.error('Something went wrong. Please try again.');
       setIsDeleting(false);
@@ -69,6 +77,18 @@ export function SettingsClient() {
       </section>
 
       <section>
+        <h2 className="text-lg font-semibold text-white">Account</h2>
+        <Button
+          variant="secondary"
+          className="mt-4"
+          onClick={() => setIsLogoutConfirmOpen(true)}
+        >
+          <Icon icon="lucide:log-out" className="mr-2" />
+          Log Out
+        </Button>
+      </section>
+
+      <section>
         <h2 className="text-lg font-semibold text-red-500">Danger Zone</h2>
         <p className="mt-1 text-sm text-neutral">
           Deleting your account is permanent and cannot be undone.
@@ -81,6 +101,16 @@ export function SettingsClient() {
           Delete Account
         </Button>
       </section>
+
+      <ConfirmationModal
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={handleLogout}
+        title="Log out?"
+        description="You'll need to log in again to access your dashboard and orders."
+        confirmLabel="Log Out"
+        isLoading={isLoggingOut}
+      />
 
       <ConfirmationModal
         isOpen={isDeleteConfirmOpen}
