@@ -1,14 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from './Sidebar';
 import { HelpModal, ConfirmationModal } from '@/components/modals';
 
 export function AuthenticatedShell({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -18,7 +16,8 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
     const supabase = createClient();
     await supabase.auth.signOut();
     toast.success('Logged out');
-    router.push('/login');
+    // Hard redirect — guarantees a clean auth state everywhere, no stale UI
+    window.location.href = '/';
   }
 
   return (
