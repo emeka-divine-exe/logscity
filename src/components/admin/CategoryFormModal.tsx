@@ -146,13 +146,13 @@ export function CategoryFormModal({ isOpen, onClose, onSaved, editingCategory }:
         <Checkbox
           label="Show on homepage (Featured)"
           checked={watch('featured')}
-          onChange={(checked) => setValue('featured', checked)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue('featured', e.target.checked)}
         />
 
         <Checkbox
           label="Buyers pick specific accounts (uncheck if they just choose a quantity)"
           checked={watch('requires_selection')}
-          onChange={(checked) => setValue('requires_selection', checked)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue('requires_selection', e.target.checked)}
         />
 
         <div className="mt-2 flex justify-end gap-3">
