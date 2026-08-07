@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { label: 'Overview', href: '/admin', icon: 'lucide:layout-dashboard' },
   { label: 'Categories', href: '/admin/categories', icon: 'lucide:folder' },
-  { label: 'Inventory', href: '/admin/accounts', icon: 'lucide:database' },
+  { label: 'Accounts', href: '/admin/accounts', icon: 'lucide:database' },
   { label: 'Orders', href: '/admin/orders', icon: 'lucide:package' },
 ];
 
