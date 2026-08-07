@@ -12,7 +12,7 @@ export default async function AdminCategoriesPage() {
       <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-heading)' }}>
         Categories
       </h1>
-      <p className="mt-1 text-sm text-neutral">Manage what's for sale on the store.</p>
+      <p className="mt-1 text-sm text-neutral">Manage what&apos;s for sale on the store.</p>
 
       <div className="mt-8">
         <CategoriesList categories={categories ?? []} />
