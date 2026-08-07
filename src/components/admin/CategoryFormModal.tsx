@@ -11,7 +11,7 @@ const categorySchema = z.object({
   name: z.string().min(2, 'Name is required'),
   platform: z.string().min(2, 'Platform is required'),
   description: z.string().optional(),
-  price: z.coerce.number().min(1, 'Price must be greater than 0'),
+  price: z.string().min(1, 'Price is required'),
   featured: z.boolean().optional(),
   requires_selection: z.boolean().optional(),
 });
@@ -48,6 +48,7 @@ export function CategoryFormModal({ isOpen, onClose, onSaved, editingCategory }:
     defaultValues: {
       featured: false,
       requires_selection: true,
+      price: '',
     },
   });
 
@@ -57,7 +58,7 @@ export function CategoryFormModal({ isOpen, onClose, onSaved, editingCategory }:
         name: editingCategory.name,
         platform: editingCategory.platform,
         description: editingCategory.description ?? '',
-        price: editingCategory.price,
+        price: String(editingCategory.price),
         featured: editingCategory.featured,
         requires_selection: editingCategory.requires_selection,
       });
@@ -66,7 +67,7 @@ export function CategoryFormModal({ isOpen, onClose, onSaved, editingCategory }:
         name: '',
         platform: '',
         description: '',
-        price: 0,
+        price: '',
         featured: false,
         requires_selection: true,
       });
@@ -74,6 +75,13 @@ export function CategoryFormModal({ isOpen, onClose, onSaved, editingCategory }:
   }, [editingCategory, isOpen, reset]);
 
   async function onSubmit(values: CategoryFormValues) {
+    const priceNumber = Number(values.price);
+
+    if (isNaN(priceNumber) || priceNumber <= 0) {
+      toast.error('Enter a valid price');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -85,7 +93,7 @@ export function CategoryFormModal({ isOpen, onClose, onSaved, editingCategory }:
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, price: priceNumber }),
       });
 
       const data = await res.json();
