@@ -16,9 +16,10 @@ const navItems = [
 interface SidebarProps {
   onHelpClick: () => void;
   onLogout: () => void;
+  isAdmin?: boolean;
 }
 
-export function Sidebar({ onHelpClick, onLogout }: SidebarProps) {
+export function Sidebar({ onHelpClick, onLogout, isAdmin = false }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -44,6 +45,17 @@ export function Sidebar({ onHelpClick, onLogout }: SidebarProps) {
         );
       })}
 
+      {isAdmin && (
+        <Link
+          href="/admin"
+          onClick={() => setIsOpen(false)}
+          className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-primary transition-colors duration-200 hover:bg-primary/10"
+        >
+          <Icon icon="lucide:shield" className="text-lg" />
+          Admin Dashboard
+        </Link>
+      )}
+
       <button
         onClick={() => {
           setIsOpen(false);
@@ -59,7 +71,6 @@ export function Sidebar({ onHelpClick, onLogout }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile top strip */}
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 md:hidden">
         <Logo />
         <button
@@ -71,13 +82,9 @@ export function Sidebar({ onHelpClick, onLogout }: SidebarProps) {
         </button>
       </div>
 
-      {/* Mobile drawer */}
       {isOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/60"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="absolute inset-0 bg-black/60" onClick={() => setIsOpen(false)} />
           <div className="relative flex h-full w-72 flex-col gap-1 bg-background p-4">
             <div className="mb-4 flex items-center justify-between">
               <Logo />
@@ -106,7 +113,6 @@ export function Sidebar({ onHelpClick, onLogout }: SidebarProps) {
         </div>
       )}
 
-      {/* Desktop persistent sidebar */}
       <aside className="sticky top-0 hidden h-screen w-64 flex-col gap-1 border-r border-white/10 p-4 md:flex">
         <div className="mb-6 px-2">
           <Logo />
@@ -124,4 +130,4 @@ export function Sidebar({ onHelpClick, onLogout }: SidebarProps) {
       </aside>
     </>
   );
-    }
+}
