@@ -16,7 +16,6 @@ const NEW_CATEGORY_VALUE = '__new__';
 
 interface FormValues {
   category_id: string;
-  profile_url: string;
   username: string;
   email: string;
   password: string;
@@ -51,7 +50,6 @@ export function AddAccountModal({ isOpen, onClose, onSaved, categories }: AddAcc
     setIsSubmitting(true);
 
     const payload: Record<string, unknown> = {
-      profile_url: values.profile_url,
       username: values.username,
       email: values.email,
       password: values.password,
@@ -115,8 +113,14 @@ export function AddAccountModal({ isOpen, onClose, onSaved, categories }: AddAcc
           </div>
         )}
 
-        <Input icon="lucide:link" placeholder="Profile URL (optional)" {...register('profile_url')} />
-        <Input icon="lucide:user" placeholder="Username (optional)" {...register('username')} />
+        <div>
+          <Input icon="lucide:user" placeholder="Username (optional)" {...register('username')} />
+          <p className="mt-1 text-xs text-neutral">
+            The profile link is created automatically from the username for platforms like Facebook,
+            Instagram, TikTok, and Twitter/X.
+          </p>
+        </div>
+
         <Input icon="lucide:mail" placeholder="Email (optional)" {...register('email')} />
         <Input icon="lucide:lock" placeholder="Password (optional)" {...register('password')} />
         <Input icon="lucide:shield" placeholder="2FA Key (optional)" {...register('two_fa_key')} />
