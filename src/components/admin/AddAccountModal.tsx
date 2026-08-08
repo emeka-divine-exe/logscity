@@ -69,7 +69,7 @@ export function AddAccountModal({ isOpen, onClose, onSaved, categories }: AddAcc
       payload.category_id = values.category_id;
     }
 
-    const res = await fetch('/api/admin/accounts', {
+    const res = await fetch('/api/admin/account', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -133,4 +133,4 @@ export function AddAccountModal({ isOpen, onClose, onSaved, categories }: AddAcc
       </form>
     </Modal>
   );
-      }
+}
