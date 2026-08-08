@@ -8,7 +8,7 @@ const CONTACT_LINKS = [
   { label: 'WhatsApp Channel', icon: 'ic:baseline-whatsapp', href: 'https://chat.whatsapp.com/GxPPfHUPCFJB05mOOfioBL' },
   { label: 'Facebook', icon: 'mdi:facebook', href: 'https://www.facebook.com/share/14mjecrKeMk/?mibextid=wwXIfr' },
   { label: 'TikTok', icon: 'ic:baseline-tiktok', href: 'https://www.tiktok.com/@logs.city1' },
-  { label: 'Email', icon: 'lucide:mail', href: 'mailto:hello@logscity.com' },
+  { label: 'Email', icon: 'lucide:mail', href: 'mailto:staffordsavvy7@gmail.com' },
   { label: 'Phone', icon: 'lucide:phone', href: 'tel:+2349131455377' },
 ];
 
