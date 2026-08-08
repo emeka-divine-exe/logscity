@@ -4,7 +4,7 @@ import { AvailableAccountsClient } from '@/components/admin';
 export default async function AvailableAccountsPage() {
   const { data: categories } = await supabaseAdmin
     .from('categories')
-    .select('id, name, platform, price, requires_selection')
+    .select('id, name, platform, description, price, featured, requires_selection')
     .order('platform')
     .order('name');
 
