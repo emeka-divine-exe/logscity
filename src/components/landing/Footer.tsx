@@ -4,12 +4,12 @@ import { Logo } from '@/components/shared';
 
 // PLACEHOLDER — replace with real handles/links once client sends details
 const CONTACT_LINKS = [
-  { label: 'WhatsApp', icon: 'ic:baseline-whatsapp', href: 'https://wa.me/2340000000000' },
-  { label: 'WhatsApp Channel', icon: 'ic:baseline-whatsapp', href: 'https://whatsapp.com/channel/PLACEHOLDER' },
-  { label: 'Facebook', icon: 'mdi:facebook', href: 'https://facebook.com/logscity' },
-  { label: 'TikTok', icon: 'ic:baseline-tiktok', href: 'https://tiktok.com/@logscity' },
+  { label: 'WhatsApp', icon: 'ic:baseline-whatsapp', href: 'https://wa.me/2349131455377' },
+  { label: 'WhatsApp Channel', icon: 'ic:baseline-whatsapp', href: 'https://chat.whatsapp.com/GxPPfHUPCFJB05mOOfioBL' },
+  { label: 'Facebook', icon: 'mdi:facebook', href: 'https://www.facebook.com/share/14mjecrKeMk/?mibextid=wwXIfr' },
+  { label: 'TikTok', icon: 'ic:baseline-tiktok', href: 'https://www.tiktok.com/@logs.city1' },
   { label: 'Email', icon: 'lucide:mail', href: 'mailto:hello@logscity.com' },
-  { label: 'Phone', icon: 'lucide:phone', href: 'tel:+2340000000000' },
+  { label: 'Phone', icon: 'lucide:phone', href: 'tel:+2349131455377' },
 ];
 
 const NAV_LINKS = [
