@@ -12,7 +12,9 @@ interface Category {
   id: string;
   name: string;
   platform: string;
+  description: string | null;
   price: number;
+  featured: boolean;
   requires_selection: boolean;
   available: number;
 }
