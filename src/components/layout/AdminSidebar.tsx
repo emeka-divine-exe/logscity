@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: 'lucide:layout-dashboard' },
-  { label: 'Available Accounts', href: '/admin/accounts', icon: 'lucide:package' },
+  { label: 'Available Accounts', href: '/admin/account', icon: 'lucide:package' },
 ];
 
 interface AdminSidebarProps {
