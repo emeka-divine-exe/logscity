@@ -37,7 +37,7 @@ export default async function AdminDashboardPage() {
       name: cat.name,
       available: (accounts ?? []).filter((a) => a.category_id === cat.id && a.status === 'available').length,
     }))
-    .filter((cat) => cat.available <= 5);
+    .filter((cat) => cat.available < 3);
 
   const { data: recentOrdersRaw } = await supabaseAdmin
     .from('orders')
