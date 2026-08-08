@@ -32,7 +32,7 @@ export function AccountsManageModal({ isOpen, onClose, categoryId, categoryName 
     if (!isOpen || !categoryId) return;
 
     setIsLoading(true);
-    fetch(`/api/admin/accounts?category_id=${categoryId}`)
+    fetch(`/api/admin/account?category_id=${categoryId}`)
       .then((res) => res.json())
       .then((data) => setAccounts(data.accounts ?? []))
       .finally(() => setIsLoading(false));
@@ -42,7 +42,7 @@ export function AccountsManageModal({ isOpen, onClose, categoryId, categoryName 
     if (!deletingId) return;
     setIsDeleting(true);
 
-    const res = await fetch(`/api/admin/accounts/${deletingId}`, { method: 'DELETE' });
+    const res = await fetch(`/api/admin/account/${deletingId}`, { method: 'DELETE' });
 
     setIsDeleting(false);
 
@@ -122,4 +122,4 @@ export function AccountsManageModal({ isOpen, onClose, categoryId, categoryName 
       />
     </>
   );
-            }
+}
