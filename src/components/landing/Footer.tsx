@@ -2,10 +2,12 @@ import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import { Logo } from '@/components/shared';
 
-// PLACEHOLDER — replace with real handles/links before launch
+// PLACEHOLDER — replace with real handles/links once client sends details
 const CONTACT_LINKS = [
-  { label: 'Instagram', icon: 'mdi:instagram', href: 'https://instagram.com/logscity' },
   { label: 'WhatsApp', icon: 'ic:baseline-whatsapp', href: 'https://wa.me/2340000000000' },
+  { label: 'WhatsApp Channel', icon: 'ic:baseline-whatsapp', href: 'https://whatsapp.com/channel/PLACEHOLDER' },
+  { label: 'Facebook', icon: 'mdi:facebook', href: 'https://facebook.com/logscity' },
+  { label: 'TikTok', icon: 'ic:baseline-tiktok', href: 'https://tiktok.com/@logscity' },
   { label: 'Email', icon: 'lucide:mail', href: 'mailto:hello@logscity.com' },
   { label: 'Phone', icon: 'lucide:phone', href: 'tel:+2340000000000' },
 ];
@@ -74,4 +76,4 @@ export function Footer() {
       </div>
     </footer>
   );
-            }
+}
