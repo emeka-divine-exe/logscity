@@ -29,9 +29,8 @@ export function Footer() {
           <div>
             <Logo />
             <p className="mt-3 max-w-xs text-sm text-neutral">
-              Social accounts, delivered instantly. Facebook, Instagram, and TikTok pages by
-              follower tier — no waiting, no back and forth.
-            </p>
+  Social media accounts, VPN accounts, and more. Instant delivery after payment — no waiting, no back and forth.
+</p>
           </div>
 
           {/* Navigation */}
