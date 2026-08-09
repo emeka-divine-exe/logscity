@@ -1,7 +1,13 @@
+import { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { RegisterForm } from '@/components/forms';
 import { BackButton } from '@/components/shared';
+
+export const metadata: Metadata = {
+  title: 'Create an Account — LogsCity',
+  description: 'Sign up for LogsCity to start buying digital accounts with instant delivery.',
+};
 
 export default function RegisterPage() {
   return (
