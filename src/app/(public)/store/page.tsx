@@ -2,6 +2,12 @@ import { createClient } from '@/lib/supabase/server';
 import { StoreGrid } from '@/components/store';
 import type { ProductCardData } from '@/components/store';
 
+export const metadata: Metadata = {
+  title: 'Store — LogsCity',
+  description:
+    'Browse social media accounts, VPN accounts, and more, organized by category. Instant delivery after purchase.',
+};
+
 export default async function StorePage() {
   const supabase = await createClient();
 
