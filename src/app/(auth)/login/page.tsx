@@ -3,6 +3,11 @@ import Link from 'next/link';
 import { LoginForm } from '@/components/forms';
 import { BackButton } from '@/components/shared';
 
+export const metadata: Metadata = {
+  title: 'Log In — LogsCity',
+  description: 'Log in to your LogsCity account to view orders and purchase digital accounts.',
+};
+
 export default function LoginPage() {
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-16 sm:px-6">
