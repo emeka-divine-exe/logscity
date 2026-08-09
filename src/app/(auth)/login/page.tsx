@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { LoginForm } from '@/components/forms';
