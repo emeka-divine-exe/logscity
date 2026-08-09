@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { StoreGrid } from '@/components/store';
 import type { ProductCardData } from '@/components/store';
