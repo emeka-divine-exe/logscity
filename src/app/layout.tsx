@@ -18,9 +18,9 @@ const urbanist = Urbanist({
 });
 
 export const metadata: Metadata = {
-  title: 'LogsCity — Social accounts, delivered instantly',
+  title: 'LogsCity — Digital Accounts, Delivered Instantly',
   description:
-    'Buy Facebook, Instagram, and TikTok pages by follower tier with instant digital delivery.',
+    'Buy social media accounts, VPN accounts, and more — delivered instantly after payment. No waiting, no back and forth.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
