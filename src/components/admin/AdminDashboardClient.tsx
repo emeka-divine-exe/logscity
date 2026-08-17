@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Icon } from '@iconify/react';
 import { AccountsManageModal } from './AccountsManageModal';
+import { PendingOrdersSection } from './PendingOrdersSection';
 
 interface LowStockItem {
   id: string;
@@ -18,6 +19,15 @@ interface RecentSale {
   createdAt: string;
 }
 
+interface PendingOrder {
+  id: string;
+  total_amount: number;
+  payment_reference: string;
+  created_at: string;
+  metadata: { categoryName?: string };
+  profiles: { full_name: string; email: string } | { full_name: string; email: string }[] | null;
+}
+
 interface AdminDashboardClientProps {
   adminName: string;
   totalAvailable: number;
@@ -26,6 +36,7 @@ interface AdminDashboardClientProps {
   totalCategories: number;
   lowStock: LowStockItem[];
   recentSales: RecentSale[];
+  pendingOrders: PendingOrder[];
 }
 
 type Filter = 'today' | 'week' | 'month';
@@ -38,6 +49,7 @@ export function AdminDashboardClient({
   totalCategories,
   lowStock,
   recentSales,
+  pendingOrders,
 }: AdminDashboardClientProps) {
   const [filter, setFilter] = useState<Filter>('today');
   const [manageCategoryId, setManageCategoryId] = useState<string | null>(null);
@@ -80,6 +92,8 @@ export function AdminDashboardClient({
           <p className="mt-1 text-2xl font-bold text-white">{totalCategories}</p>
         </div>
       </div>
+
+      <PendingOrdersSection orders={pendingOrders} />
 
       {lowStock.length > 0 && (
         <div className="mt-8 rounded-2xl border border-red-500/30 bg-red-500/10 p-5">
@@ -160,4 +174,4 @@ export function AdminDashboardClient({
       />
     </div>
   );
-          }
+}
