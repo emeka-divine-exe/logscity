@@ -196,7 +196,7 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
             </div>
           </div>
           <p className="text-sm text-neutral">
-            We've opened WhatsApp with your order details. Send your payment proof there —
+            We&apos;ve opened WhatsApp with your order details. Send your payment proof there —
             your accounts will be released as soon as we confirm it.
           </p>
         </div>
