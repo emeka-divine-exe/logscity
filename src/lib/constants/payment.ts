@@ -1,6 +1,6 @@
 export const BANK_DETAILS = {
   accountName: 'Darlyton Oseghale Egboshe',
-  accountNumber: '9131455377',
+  accountNumber: '6422643972',
   bankName: 'Opay',
 };
 
