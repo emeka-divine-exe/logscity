@@ -61,6 +61,15 @@ export default async function AdminDashboardPage() {
     };
   });
 
+  const { data: pendingOrders } = await supabaseAdmin
+    .from('orders')
+    .select(`
+      id, total_amount, payment_reference, created_at, metadata,
+      profiles ( full_name, email )
+    `)
+    .eq('payment_status', 'pending')
+    .order('created_at', { ascending: false });
+
   return (
     <AdminDashboardClient
       adminName={adminProfile?.full_name ?? 'Admin'}
@@ -70,6 +79,7 @@ export default async function AdminDashboardPage() {
       totalCategories={totalCategories}
       lowStock={lowStock}
       recentSales={recentSales}
+      pendingOrders={pendingOrders ?? []}
     />
   );
 }
