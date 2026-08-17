@@ -25,7 +25,9 @@ interface OrderItem {
 interface Order {
   id: string;
   total_amount: number;
+  payment_status: string;
   created_at: string;
+  metadata: { categoryName?: string };
   order_items: OrderItem[];
 }
 
@@ -63,31 +65,49 @@ export function OrdersList({ orders }: OrdersListProps) {
     <div className="flex flex-col gap-4">
       {orders.map((order) => {
         const isOpen = openOrderId === order.id;
+        const isPending = order.payment_status === 'pending';
+
         return (
           <div key={order.id} className="rounded-2xl border border-white/10 bg-white/5">
             <button
-              onClick={() => setOpenOrderId(isOpen ? null : order.id)}
+              onClick={() => !isPending && setOpenOrderId(isOpen ? null : order.id)}
               className="flex w-full items-center justify-between p-5 text-left"
             >
               <div>
                 <p className="text-sm text-white">Order #{order.id.slice(0, 8)}</p>
                 <p className="text-xs text-neutral">
-                  {new Date(order.created_at).toLocaleDateString()} · {order.order_items.length}{' '}
-                  {order.order_items.length === 1 ? 'account' : 'accounts'}
+                  {new Date(order.created_at).toLocaleDateString()} ·{' '}
+                  {isPending
+                    ? order.metadata?.categoryName ?? 'Processing'
+                    : `${order.order_items.length} ${order.order_items.length === 1 ? 'account' : 'accounts'}`}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <p className="text-sm font-semibold text-white">
                   ₦{Number(order.total_amount).toLocaleString()}
                 </p>
-                <Icon
-                  icon="lucide:chevron-down"
-                  className={cn('text-neutral transition-transform', isOpen && 'rotate-180')}
-                />
+                {isPending ? (
+                  <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-medium text-amber-400">
+                    Pending
+                  </span>
+                ) : (
+                  <Icon
+                    icon="lucide:chevron-down"
+                    className={cn('text-neutral transition-transform', isOpen && 'rotate-180')}
+                  />
+                )}
               </div>
             </button>
 
-            {isOpen && (
+            {isPending && (
+              <div className="border-t border-white/10 p-5">
+                <p className="text-sm text-neutral">
+                  Waiting for payment confirmation. Your accounts will appear here once confirmed.
+                </p>
+              </div>
+            )}
+
+            {!isPending && isOpen && (
               <div className="flex flex-col gap-3 border-t border-white/10 p-5">
                 {order.order_items.map((item) => {
                   const account = item.accounts;
@@ -159,4 +179,4 @@ export function OrdersList({ orders }: OrdersListProps) {
       })}
     </div>
   );
-        }
+}
