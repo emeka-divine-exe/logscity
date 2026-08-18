@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: 'lucide:layout-dashboard' },
+  { label: 'Top Up', href: '/topup', icon: 'lucide:wallet' },
   { label: 'Orders', href: '/orders', icon: 'lucide:package' },
   { label: 'Settings', href: '/settings', icon: 'lucide:settings' },
 ];
