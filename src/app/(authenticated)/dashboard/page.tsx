@@ -8,7 +8,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, full_name')
+    .select('id, full_name, balance')
     .eq('auth_user_id', user!.id)
     .single();
 
@@ -36,6 +36,12 @@ export default async function DashboardPage() {
       </p>
 
       <div className="mt-8 grid grid-cols-2 gap-4">
+        <div className="col-span-2 rounded-2xl border border-primary/30 bg-primary/5 p-5">
+          <p className="text-sm text-neutral">Your Balance</p>
+          <p className="mt-1 text-2xl font-bold text-white">
+            ₦{Number(profile?.balance ?? 0).toLocaleString()}
+          </p>
+        </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
           <p className="text-sm text-neutral">Total Orders</p>
           <p className="mt-1 text-2xl font-bold text-white">{totalOrders}</p>
@@ -49,6 +55,9 @@ export default async function DashboardPage() {
       <div className="mt-8 flex flex-wrap gap-3">
         <Link href="/store">
           <Button variant="primary">Browse Store</Button>
+        </Link>
+        <Link href="/topup">
+          <Button variant="secondary">Top Up Balance</Button>
         </Link>
         <Link href="/orders">
           <Button variant="secondary">My Orders</Button>
