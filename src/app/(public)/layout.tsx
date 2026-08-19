@@ -1,4 +1,5 @@
 import { Navbar, Footer } from '@/components/landing';
+import { FloatingWhatsApp } from '@/components/shared';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -6,6 +7,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <Navbar />
       <main>{children}</main>
       <Footer />
+      <FloatingWhatsApp />
     </>
   );
 }
