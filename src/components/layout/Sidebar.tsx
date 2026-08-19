@@ -15,12 +15,11 @@ const navItems = [
 ];
 
 interface SidebarProps {
-  onHelpClick: () => void;
   onLogout: () => void;
   isAdmin?: boolean;
 }
 
-export function Sidebar({ onHelpClick, onLogout, isAdmin = false }: SidebarProps) {
+export function Sidebar({ onLogout, isAdmin = false }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -56,17 +55,6 @@ export function Sidebar({ onHelpClick, onLogout, isAdmin = false }: SidebarProps
           Admin Dashboard
         </Link>
       )}
-
-      <button
-        onClick={() => {
-          setIsOpen(false);
-          onHelpClick();
-        }}
-        className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral transition-colors duration-200 hover:bg-white/5 hover:text-white"
-      >
-        <Icon icon="lucide:help-circle" className="text-lg" />
-        Help
-      </button>
     </>
   );
 
