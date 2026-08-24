@@ -50,11 +50,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const account = await createReservedAccount({
-      email: user.email!, // profiles has no email column — pulled from auth.users
+      email: user.email!,
       name: profile.full_name,
       phoneNumber,
       idType,
-      idValue, // used only for this call — never persisted, never logged below
+      idValue,
     });
 
     const { error: updateError } = await supabaseAdmin
@@ -76,11 +76,13 @@ export async function POST(req: NextRequest) {
       accountName: account.accountName,
     });
   } catch (err) {
-    // Deliberately never logs idValue, idType, or phoneNumber here.
+    // Never logs idValue, idType, or phoneNumber. Now also logs PayVessel's
+    // own error text (err.raw) so a 400 tells us the real reason, not just the code.
     console.error('Wallet activation failed', {
       profileId: profile.id,
       message: err instanceof Error ? err.message : 'unknown error',
       status: err instanceof PayvesselError ? err.status : undefined,
+      raw: err instanceof PayvesselError ? err.raw : undefined,
     });
 
     await supabaseAdmin
@@ -93,4 +95,4 @@ export async function POST(req: NextRequest) {
       { status: 502 }
     );
   }
-      }
+}
