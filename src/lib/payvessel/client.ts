@@ -34,6 +34,7 @@ interface PayvesselResponse {
   service: string;
   business: string;
   banks: PayvesselBankAccount[];
+  message?: string;
 }
 
 export class PayvesselError extends Error {
@@ -46,6 +47,10 @@ export class PayvesselError extends Error {
 export async function createReservedAccount(
   params: CreateReservedAccountParams
 ): Promise<PayvesselBankAccount> {
+  // PayVessel's docs declare bvn/nin as type "number" — sending them as
+  // strings ("073...") is a documented cause of 400 responses.
+  const idValueAsNumber = Number(params.idValue);
+
   const body: Record<string, unknown> = {
     email: params.email,
     name: params.name,
@@ -55,8 +60,7 @@ export async function createReservedAccount(
     businessid: BUSINESS_ID,
   };
 
-  // Only the ID the customer chose is sent — never both, never stored past this call.
-  body[params.idType] = params.idValue;
+  body[params.idType] = idValueAsNumber;
 
   const response = await fetch(
     `${PAYVESSEL_BASE_URL}/pms/api/external/request/customerReservedAccount/`,
@@ -71,13 +75,19 @@ export async function createReservedAccount(
     }
   );
 
-  const data = (await response.json().catch(() => null)) as PayvesselResponse | null;
+  const rawText = await response.text();
+  let data: PayvesselResponse | null = null;
+  try {
+    data = JSON.parse(rawText);
+  } catch {
+    // response wasn't JSON — rawText itself becomes the error detail below
+  }
 
   if (!response.ok || !data?.status) {
     throw new PayvesselError(
-      `PayVessel account creation failed (HTTP ${response.status})`,
+      data?.message ?? `PayVessel account creation failed (HTTP ${response.status})`,
       response.status,
-      data
+      data ?? rawText
     );
   }
 
