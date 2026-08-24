@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
-import { TransactionHistory } from '@/components/wallet';
-import { Icon } from '@iconify/react';
+import { TransactionHistory, ActivateWalletForm } from '@/components/wallet';
 
 export default async function TopUpPage() {
   const supabase = await createClient();
@@ -10,7 +9,7 @@ export default async function TopUpPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, balance, virtual_account_number')
+    .select('id, balance, virtual_account_number, bank_name, account_name')
     .eq('auth_user_id', user!.id)
     .single();
 
@@ -40,21 +39,15 @@ export default async function TopUpPage() {
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6">
             <p className="text-sm text-neutral">Send money to your personal account:</p>
             <p className="mt-2 text-xl font-bold text-white">{profile.virtual_account_number}</p>
-            <p className="mt-1 text-xs text-neutral">
+            <p className="mt-1 text-sm text-white">
+              {profile.bank_name} — {profile.account_name}
+            </p>
+            <p className="mt-3 text-xs text-neutral">
               Your balance updates automatically once payment is received.
             </p>
           </div>
         ) : (
-          <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6">
-            <Icon icon="lucide:construction" className="mt-0.5 text-lg text-amber-400" />
-            <div>
-              <p className="text-sm font-medium text-amber-400">Top-up is being set up</p>
-              <p className="mt-1 text-sm text-neutral">
-                We&apos;re finishing setup with our banking partner. Check back soon — your
-                personal top-up account will appear here.
-              </p>
-            </div>
-          </div>
+          <ActivateWalletForm />
         )}
       </div>
 
