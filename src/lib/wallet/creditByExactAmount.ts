@@ -1,21 +1,32 @@
 import 'server-only';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
-export async function createPendingTopup(profileId: string, baseAmount: number) {
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const kobo = Math.floor(Math.random() * 99) + 1; // 1–99, never a flat naira
-    const exactAmount = Number((baseAmount + kobo / 100).toFixed(2));
+export async function creditWalletByExactAmount(amount: number, rawSms: string) {
+  const { data: pending } = await supabaseAdmin
+    .from('pending_topups')
+    .select('id, profile_id')
+    .eq('exact_amount', amount)
+    .eq('status', 'pending')
+    .gt('expires_at', new Date().toISOString())
+    .single();
 
-    const { data, error } = await supabaseAdmin
-      .from('pending_topups')
-      .insert({ profile_id: profileId, base_amount: baseAmount, exact_amount: exactAmount })
-      .select('id, exact_amount, expires_at')
-      .single();
-
-    if (!error) return data;
-
-    if (error.code !== '23505') throw error;
+  if (!pending) {
+    await supabaseAdmin.from('unmatched_sms_payments').insert({ amount, raw_sms: rawSms });
+    return { success: false };
   }
 
-  throw new Error('Could not generate a unique top-up amount after 10 attempts');
+  const { error } = await supabaseAdmin.rpc('credit_wallet', {
+    p_profile_id: pending.profile_id,
+    p_amount: amount,
+    p_reference: `sms-${pending.id}`,
+  });
+
+  if (error) {
+    console.error('credit_wallet failed', { error, pendingId: pending.id, amount });
+    return { success: false };
+  }
+
+  await supabaseAdmin.from('pending_topups').update({ status: 'completed' }).eq('id', pending.id);
+
+  return { success: true };
 }
