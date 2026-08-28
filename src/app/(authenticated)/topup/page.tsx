@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
-import { TransactionHistory, ActivateWalletForm } from '@/components/wallet';
+import { TransactionHistory, TopUpRequestForm } from '@/components/wallet';
 
 export default async function TopUpPage() {
   const supabase = await createClient();
@@ -9,7 +9,7 @@ export default async function TopUpPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, balance, virtual_account_number, bank_name, account_name')
+    .select('id, balance')
     .eq('auth_user_id', user!.id)
     .single();
 
@@ -35,20 +35,7 @@ export default async function TopUpPage() {
       </div>
 
       <div className="mt-6">
-        {profile?.virtual_account_number ? (
-          <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6">
-            <p className="text-sm text-neutral">Send money to your personal account:</p>
-            <p className="mt-2 text-xl font-bold text-white">{profile.virtual_account_number}</p>
-            <p className="mt-1 text-sm text-white">
-              {profile.bank_name} — {profile.account_name}
-            </p>
-            <p className="mt-3 text-xs text-neutral">
-              Your balance updates automatically once payment is received.
-            </p>
-          </div>
-        ) : (
-          <ActivateWalletForm />
-        )}
+        <TopUpRequestForm />
       </div>
 
       <div className="mt-10">
