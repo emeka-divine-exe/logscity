@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Icon } from '@iconify/react';
 import { AccountsManageModal } from './AccountsManageModal';
 import { PendingOrdersSection } from './PendingOrdersSection';
+import { WarningsSection } from './WarningsSection';
 
 interface LowStockItem {
   id: string;
@@ -28,6 +29,21 @@ interface PendingOrder {
   profiles: { full_name: string; email: string } | { full_name: string; email: string }[] | null;
 }
 
+interface RestockWarning {
+  id: string;
+  reason: string;
+  detail: string | null;
+  created_at: string;
+  categoryName: string;
+}
+
+interface UnmatchedSmsPayment {
+  id: string;
+  amount: number;
+  raw_sms: string | null;
+  created_at: string;
+}
+
 interface AdminDashboardClientProps {
   adminName: string;
   totalAvailable: number;
@@ -37,6 +53,8 @@ interface AdminDashboardClientProps {
   lowStock: LowStockItem[];
   recentSales: RecentSale[];
   pendingOrders: PendingOrder[];
+  restockWarnings: RestockWarning[];
+  unmatchedPayments: UnmatchedSmsPayment[];
 }
 
 type Filter = 'today' | 'week' | 'month';
@@ -50,6 +68,8 @@ export function AdminDashboardClient({
   lowStock,
   recentSales,
   pendingOrders,
+  restockWarnings,
+  unmatchedPayments,
 }: AdminDashboardClientProps) {
   const [filter, setFilter] = useState<Filter>('today');
   const [manageCategoryId, setManageCategoryId] = useState<string | null>(null);
@@ -92,6 +112,8 @@ export function AdminDashboardClient({
           <p className="mt-1 text-2xl font-bold text-white">{totalCategories}</p>
         </div>
       </div>
+
+      <WarningsSection restockWarnings={restockWarnings} unmatchedPayments={unmatchedPayments} />
 
       <PendingOrdersSection orders={pendingOrders} />
 
