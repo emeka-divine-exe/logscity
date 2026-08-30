@@ -70,6 +70,29 @@ export default async function AdminDashboardPage() {
     .eq('payment_status', 'pending')
     .order('created_at', { ascending: false });
 
+  const { data: restockWarningsRaw } = await supabaseAdmin
+    .from('restock_warnings')
+    .select('id, reason, detail, created_at, categories ( name )')
+    .eq('resolved', false)
+    .order('created_at', { ascending: false });
+
+  const restockWarnings = (restockWarningsRaw ?? []).map((w) => {
+    const category = Array.isArray(w.categories) ? w.categories[0] : w.categories;
+    return {
+      id: w.id,
+      reason: w.reason,
+      detail: w.detail,
+      created_at: w.created_at,
+      categoryName: (category as { name: string } | null)?.name ?? 'Unknown category',
+    };
+  });
+
+  const { data: unmatchedPayments } = await supabaseAdmin
+    .from('unmatched_sms_payments')
+    .select('id, amount, raw_sms, created_at')
+    .eq('resolved', false)
+    .order('created_at', { ascending: false });
+
   return (
     <AdminDashboardClient
       adminName={adminProfile?.full_name ?? 'Admin'}
@@ -80,6 +103,8 @@ export default async function AdminDashboardPage() {
       lowStock={lowStock}
       recentSales={recentSales}
       pendingOrders={pendingOrders ?? []}
+      restockWarnings={restockWarnings}
+      unmatchedPayments={unmatchedPayments ?? []}
     />
   );
 }
