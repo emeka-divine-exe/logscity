@@ -1,11 +1,17 @@
 import 'server-only';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
-// Generates a unique exact amount within 1–99 kobo of the requested amount,
-// retrying if that exact figure happens to already be pending for someone else.
 export async function createPendingTopup(profileId: string, baseAmount: number) {
+  // Housekeeping: mark old unpaid requests as expired before generating a
+  // new one, so stale rows don't sit around forever.
+  await supabaseAdmin
+    .from('pending_topups')
+    .update({ status: 'expired' })
+    .eq('status', 'pending')
+    .lt('expires_at', new Date().toISOString());
+
   for (let attempt = 0; attempt < 10; attempt++) {
-    const kobo = Math.floor(Math.random() * 99) + 1; // 1–99, never a flat naira
+    const kobo = Math.floor(Math.random() * 99) + 1;
     const exactAmount = Number((baseAmount + kobo / 100).toFixed(2));
 
     const { data, error } = await supabaseAdmin
@@ -15,9 +21,6 @@ export async function createPendingTopup(profileId: string, baseAmount: number) 
       .single();
 
     if (!error) return data;
-
-    // Unique index collision — someone else currently has this exact amount pending.
-    // Safe to just retry with a new random kobo value.
     if (error.code !== '23505') throw error;
   }
 
