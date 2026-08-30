@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Modal, Button, Spinner, EmptyState } from '@/components/ui';
 import { Icon } from '@iconify/react';
-import { BANK_DETAILS, buildWhatsAppOrderLink } from '@/lib/constants/payment';
 
 interface AvailableAccount {
   id: string;
@@ -32,6 +31,7 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
   const [availableCount, setAvailableCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [quantity, setQuantity] = useState(0);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -50,6 +50,17 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
     setIsLoading(true);
 
     async function loadData() {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('balance')
+          .eq('auth_user_id', user.id)
+          .single();
+        setWalletBalance(Number(profile?.balance ?? 0));
+      }
+
       const { data: categoryData } = await supabase
         .from('categories')
         .select('id, name, price, requires_selection')
@@ -98,6 +109,7 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
   const requiresSelection = category?.requires_selection ?? true;
   const count = requiresSelection ? selectedIds.size : quantity;
   const total = category ? category.price * count : 0;
+  const insufficientBalance = total > 0 && total > walletBalance;
 
   async function handlePlaceOrder() {
     if (!category || count === 0) return;
@@ -105,17 +117,7 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
     setIsProcessing(true);
 
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error('Please log in to continue');
-        router.push('/login?redirect=/store');
-        setIsProcessing(false);
-        return;
-      }
-
-      const res = await fetch('/api/checkout/initialize', {
+      const res = await fetch('/api/checkout/wallet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -128,17 +130,17 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || 'Failed to place order');
+        if (res.status === 402) {
+          toast.error('Insufficient balance — top up your wallet to continue');
+        } else {
+          toast.error(data.error || 'Failed to place order');
+        }
         setIsProcessing(false);
         return;
       }
 
-      const summary = `${data.count} × ${data.categoryName}`;
-      const whatsappLink = buildWhatsAppOrderLink(data.reference, data.amount, summary);
-
-      window.open(whatsappLink, '_blank');
       setOrderPlaced(true);
-      toast.success('Order placed — complete payment via WhatsApp');
+      toast.success('Purchase successful!');
     } catch (error) {
       console.error('Order error:', error);
       toast.error('Something went wrong. Please try again.');
@@ -150,6 +152,11 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
   function handleDone() {
     onClose();
     router.push('/orders');
+  }
+
+  function handleTopUp() {
+    onClose();
+    router.push('/topup');
   }
 
   return (
@@ -172,39 +179,55 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
                 {requiresSelection ? 'Selected' : 'Quantity'}: {count}
               </p>
               <p className="text-lg font-bold text-white">₦{total.toLocaleString()}</p>
+              <p className="text-xs text-neutral">
+                Wallet balance: ₦{walletBalance.toLocaleString()}
+              </p>
             </div>
-            <Button
-              variant="primary"
-              disabled={count === 0 || isProcessing}
-              isLoading={isProcessing}
-              onClick={handlePlaceOrder}
-            >
-              Order via WhatsApp
-            </Button>
+            {insufficientBalance ? (
+              <Button variant="primary" onClick={handleTopUp}>
+                Top Up Wallet
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                disabled={count === 0 || isProcessing}
+                isLoading={isProcessing}
+                onClick={handlePlaceOrder}
+              >
+                Buy Now
+              </Button>
+            )}
           </div>
         )
       }
     >
       {orderPlaced ? (
         <div className="flex flex-col gap-4 py-4">
-          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
-            <p className="text-sm font-medium text-white">Send payment to:</p>
-            <div className="mt-2 flex flex-col gap-1 text-sm text-neutral">
-              <p>Bank: <span className="text-white">{BANK_DETAILS.bankName}</span></p>
-              <p>Account Name: <span className="text-white">{BANK_DETAILS.accountName}</span></p>
-              <p>Account Number: <span className="text-white">{BANK_DETAILS.accountNumber}</span></p>
+          <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+            <Icon icon="lucide:check-circle" className="text-2xl text-primary" />
+            <div>
+              <p className="text-sm font-medium text-white">Purchase complete</p>
+              <p className="mt-1 text-sm text-neutral">
+                ₦{total.toLocaleString()} was deducted from your wallet. Your account details are
+                ready in Orders.
+              </p>
             </div>
           </div>
-          <p className="text-sm text-neutral">
-            We&apos;ve opened WhatsApp with your order details. Send your payment proof there —
-            your accounts will be released as soon as we confirm it.
-          </p>
         </div>
       ) : (
         <>
           {isLoading && (
             <div className="flex items-center justify-center py-8">
               <Spinner />
+            </div>
+          )}
+
+          {!isLoading && insufficientBalance && (
+            <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+              <p className="text-sm text-amber-400">
+                Your wallet balance (₦{walletBalance.toLocaleString()}) isn&apos;t enough for this
+                purchase. Top up to continue.
+              </p>
             </div>
           )}
 
@@ -283,4 +306,4 @@ export function AccountSelectionModal({ categoryId, onClose }: AccountSelectionM
       )}
     </Modal>
   );
-  }
+}
