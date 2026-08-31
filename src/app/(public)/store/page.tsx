@@ -15,7 +15,7 @@ export default async function StorePage() {
   const { data: categories, error } = await supabase
     .from('categories')
     .select('id, name, platform, description, price, requires_selection')
-    .order('platform', { ascending: true });
+    .order('name', { ascending: true });
 
   if (error) {
     console.error('Failed to load categories:', error);
@@ -50,7 +50,7 @@ export default async function StorePage() {
           Store
         </h1>
         <p className="mt-2 text-neutral">
-          Browse all available accounts, grouped by platform.
+          Browse all available accounts.
         </p>
 
         <StoreGrid products={products} />
