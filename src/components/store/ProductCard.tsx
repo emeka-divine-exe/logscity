@@ -46,7 +46,7 @@ export function ProductCard({ product, onChooseAccounts, className }: ProductCar
         <span className="text-lg font-bold text-white">
           ₦{price.toLocaleString()}
         </span>
-        <span className={cn('text-neutral', isOutOfStock && 'text-red-500')}>
+        <span className="text-neutral">
           {isOutOfStock ? 'Out of stock' : `${availableCount} Available`}
         </span>
       </div>
@@ -54,7 +54,6 @@ export function ProductCard({ product, onChooseAccounts, className }: ProductCar
       <Button
         variant="primary"
         size="sm"
-        disabled={isOutOfStock}
         onClick={() => onChooseAccounts(id)}
         className="w-full"
       >
