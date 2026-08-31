@@ -13,6 +13,14 @@ export default async function TopUpPage() {
     .eq('auth_user_id', user!.id)
     .single();
 
+  const { data: activeRequest } = await supabase
+    .from('pending_topups')
+    .select('id, exact_amount, expires_at, marked_sent')
+    .eq('profile_id', profile?.id)
+    .eq('status', 'pending')
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
   const { data: transactions } = await supabase
     .from('wallet_transactions')
     .select('id, type, amount, balance_after, created_at')
@@ -35,7 +43,18 @@ export default async function TopUpPage() {
       </div>
 
       <div className="mt-6">
-        <TopUpRequestForm />
+        <TopUpRequestForm
+          initialRequest={
+            activeRequest
+              ? {
+                  id: activeRequest.id,
+                  exactAmount: activeRequest.exact_amount,
+                  expiresAt: activeRequest.expires_at,
+                  markedSent: activeRequest.marked_sent,
+                }
+              : null
+          }
+        />
       </div>
 
       <div className="mt-10">
