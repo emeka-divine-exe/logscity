@@ -1,14 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 export interface ProductCardData {
   id: string;
-  platform: string;
+  platform: string | null;
   name: string;
   description: string | null;
   price: number;
@@ -23,11 +21,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onChooseAccounts, className }: ProductCardProps) {
-  const { id, platform, name, description, price, availableCount, requiresSelection } = product;
+  const { id, name, description, price, availableCount, requiresSelection } = product;
   const isOutOfStock = availableCount === 0;
-  const [iconFailed, setIconFailed] = useState(false);
-
-  const iconSrc = `/platforms/${platform.toLowerCase()}.png`;
 
   return (
     <div
@@ -37,21 +32,8 @@ export function ProductCard({ product, onChooseAccounts, className }: ProductCar
       )}
     >
       <div className="flex items-center gap-3">
-        <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-white/10">
-          {iconFailed ? (
-            <Icon
-              icon="lucide:globe"
-              className="absolute inset-0 m-auto text-lg text-neutral"
-            />
-          ) : (
-            <Image
-              src={iconSrc}
-              alt={platform}
-              fill
-              className="object-contain p-1.5"
-              onError={() => setIconFailed(true)}
-            />
-          )}
+        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/10">
+          <Icon icon="lucide:package" className="text-lg text-neutral" />
         </div>
         <h3 className="text-base font-semibold text-white">{name}</h3>
       </div>
