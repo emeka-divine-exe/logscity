@@ -26,10 +26,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
   }
 
+  const { data: existing } = await supabaseAdmin
+    .from('pending_topups')
+    .select('id, exact_amount, expires_at, marked_sent')
+    .eq('profile_id', profile.id)
+    .eq('status', 'pending')
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  if (existing) {
+    return NextResponse.json({
+      id: existing.id,
+      exactAmount: existing.exact_amount,
+      expiresAt: existing.expires_at,
+      markedSent: existing.marked_sent,
+    });
+  }
+
   const pending = await createPendingTopup(profile.id, amount);
 
   return NextResponse.json({
+    id: pending.id,
     exactAmount: pending.exact_amount,
     expiresAt: pending.expires_at,
+    markedSent: false,
   });
 }
