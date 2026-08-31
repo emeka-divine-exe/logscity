@@ -187,7 +187,7 @@ export function TopUpRequestForm({ initialRequest }: TopUpRequestFormProps) {
             disabled={loading}
             className="flex-1 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
           >
-            I've sent it
+            Sent
           </button>
         )}
         <button
