@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Icon } from '@iconify/react';
 import { AccountsManageModal } from './AccountsManageModal';
 import { PendingOrdersSection } from './PendingOrdersSection';
+import { PendingTopupsSection } from './PendingTopupsSection';
 import { WarningsSection } from './WarningsSection';
 
 interface LowStockItem {
@@ -55,6 +56,13 @@ interface AdminDashboardClientProps {
   pendingOrders: PendingOrder[];
   restockWarnings: RestockWarning[];
   unmatchedPayments: UnmatchedSmsPayment[];
+  pendingTopups: {
+    id: string;
+    exact_amount: number;
+    created_at: string;
+    customerName: string;
+    customerEmail: string;
+  }[];
 }
 
 type Filter = 'today' | 'week' | 'month';
@@ -70,6 +78,7 @@ export function AdminDashboardClient({
   pendingOrders,
   restockWarnings,
   unmatchedPayments,
+  pendingTopups,
 }: AdminDashboardClientProps) {
   const [filter, setFilter] = useState<Filter>('today');
   const [manageCategoryId, setManageCategoryId] = useState<string | null>(null);
@@ -114,6 +123,8 @@ export function AdminDashboardClient({
       </div>
 
       <WarningsSection restockWarnings={restockWarnings} unmatchedPayments={unmatchedPayments} />
+
+      <PendingTopupsSection topups={pendingTopups} />
 
       <PendingOrdersSection orders={pendingOrders} />
 
