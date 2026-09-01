@@ -93,6 +93,24 @@ export default async function AdminDashboardPage() {
     .eq('resolved', false)
     .order('created_at', { ascending: false });
 
+  const { data: pendingTopupsRaw } = await supabaseAdmin
+    .from('pending_topups')
+    .select('id, exact_amount, created_at, profiles ( full_name, email )')
+    .eq('status', 'pending')
+    .eq('marked_sent', true)
+    .order('created_at', { ascending: false });
+
+  const pendingTopups = (pendingTopupsRaw ?? []).map((t) => {
+    const profile = Array.isArray(t.profiles) ? t.profiles[0] : t.profiles;
+    return {
+      id: t.id,
+      exact_amount: t.exact_amount,
+      created_at: t.created_at,
+      customerName: (profile as { full_name: string } | null)?.full_name ?? 'Unknown',
+      customerEmail: (profile as { email: string } | null)?.email ?? '',
+    };
+  });
+
   return (
     <AdminDashboardClient
       adminName={adminProfile?.full_name ?? 'Admin'}
@@ -105,6 +123,7 @@ export default async function AdminDashboardPage() {
       pendingOrders={pendingOrders ?? []}
       restockWarnings={restockWarnings}
       unmatchedPayments={unmatchedPayments ?? []}
+      pendingTopups={pendingTopups}
     />
   );
 }
