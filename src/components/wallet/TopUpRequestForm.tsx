@@ -73,8 +73,11 @@ export function TopUpRequestForm({ initialRequest }: TopUpRequestFormProps) {
       return;
     }
 
-    setRequest({ ...request, markedSent: true });
-    toast.success("Marked as sent — we're confirming your payment");
+    toast.success('Your payment will be approved shortly.');
+
+    setRequest(null);
+    setAmount('');
+    router.refresh();
   }
 
   async function handleCancel() {
@@ -157,48 +160,32 @@ export function TopUpRequestForm({ initialRequest }: TopUpRequestFormProps) {
         </p>
       </div>
 
-      {request.markedSent ? (
-        <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/10 bg-black/20 p-4">
-          <Icon icon="lucide:loader-2" className="animate-spin text-lg text-primary" />
-          <div>
-            <p className="text-sm font-medium text-white">Confirming your payment</p>
-            <p className="mt-0.5 text-xs text-neutral">
-              Your balance updates automatically once we receive it — usually within a minute.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-          <p className="text-sm text-amber-400">
-            Send the exact amount above, down to the kobo, to the account shown.
-          </p>
-        </div>
-      )}
+      <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+        <p className="text-sm text-amber-400">
+          Send the exact amount above, down to the kobo, to the account shown.
+        </p>
+      </div>
 
       <p className="mt-3 text-xs text-neutral">
         This amount is reserved for you until {new Date(request.expiresAt).toLocaleTimeString()}.
       </p>
 
       <div className="mt-4 flex gap-3">
-        {!request.markedSent && (
-          <button
-            type="button"
-            onClick={handleMarkSent}
-            disabled={loading}
-            className="flex-1 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            Sent
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleMarkSent}
+          disabled={loading}
+          className="flex-1 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          Sent
+        </button>
         <button
           type="button"
           onClick={handleCancel}
           disabled={loading}
-          className={`flex items-center justify-center rounded-2xl border border-white/10 text-sm text-neutral disabled:opacity-50 ${
-            request.markedSent ? 'flex-1 px-4 py-3' : 'w-14'
-          }`}
+          className="flex w-14 items-center justify-center rounded-2xl border border-white/10 text-sm text-neutral disabled:opacity-50"
         >
-          {request.markedSent ? 'Cancel' : <Icon icon="lucide:x" className="text-lg" />}
+          <Icon icon="lucide:x" className="text-lg" />
         </button>
       </div>
     </div>
