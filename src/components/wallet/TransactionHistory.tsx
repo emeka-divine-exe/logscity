@@ -4,8 +4,9 @@ interface Transaction {
   id: string;
   type: string;
   amount: number;
-  balance_after: number;
+  balance_after: number | null;
   created_at: string;
+  status: 'pending' | 'completed';
 }
 
 interface TransactionHistoryProps {
@@ -27,6 +28,8 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
     <div className="flex flex-col gap-2">
       {transactions.map((tx) => {
         const isCredit = tx.type === 'topup';
+        const isPending = tx.status === 'pending';
+
         return (
           <div
             key={tx.id}
@@ -36,9 +39,16 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
               <p className="text-sm capitalize text-white">{tx.type}</p>
               <p className="text-xs text-neutral">{new Date(tx.created_at).toLocaleDateString()}</p>
             </div>
-            <p className={`text-sm font-semibold ${isCredit ? 'text-green-400' : 'text-white'}`}>
-              {isCredit ? '+' : '-'}₦{Number(tx.amount).toLocaleString()}
-            </p>
+            <div className="text-right">
+              <p
+                className={`text-sm font-semibold ${
+                  isPending ? 'text-amber-400' : isCredit ? 'text-green-400' : 'text-white'
+                }`}
+              >
+                {isCredit ? '+' : '-'}₦{Number(tx.amount).toLocaleString()}
+              </p>
+              {isPending && <p className="text-xs text-amber-400">Pending</p>}
+            </div>
           </div>
         );
       })}
