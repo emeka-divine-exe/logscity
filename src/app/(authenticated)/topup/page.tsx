@@ -21,12 +21,38 @@ export default async function TopUpPage() {
     .gt('expires_at', new Date().toISOString())
     .single();
 
-  const { data: transactions } = await supabase
+  const { data: completedTx } = await supabase
     .from('wallet_transactions')
     .select('id, type, amount, balance_after, created_at')
     .eq('profile_id', profile?.id)
     .order('created_at', { ascending: false })
     .limit(50);
+
+  const { data: pendingTx } = await supabase
+    .from('pending_topups')
+    .select('id, exact_amount, created_at')
+    .eq('profile_id', profile?.id)
+    .eq('status', 'pending')
+    .eq('marked_sent', true);
+
+  const combinedHistory = [
+    ...(completedTx ?? []).map((tx) => ({
+      id: tx.id,
+      type: tx.type,
+      amount: Number(tx.amount),
+      balance_after: Number(tx.balance_after),
+      created_at: tx.created_at,
+      status: 'completed' as const,
+    })),
+    ...(pendingTx ?? []).map((tx) => ({
+      id: tx.id,
+      type: 'topup',
+      amount: Number(tx.exact_amount),
+      balance_after: null,
+      created_at: tx.created_at,
+      status: 'pending' as const,
+    })),
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <div>
@@ -60,7 +86,7 @@ export default async function TopUpPage() {
       <div className="mt-10">
         <h2 className="text-lg font-semibold text-white">Transaction History</h2>
         <div className="mt-4">
-          <TransactionHistory transactions={transactions ?? []} />
+          <TransactionHistory transactions={combinedHistory} />
         </div>
       </div>
     </div>
