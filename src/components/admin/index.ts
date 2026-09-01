@@ -5,3 +5,4 @@ export { AvailableAccountsClient } from './AdminAccountClient';
 export { AdminDashboardClient } from './AdminDashboardClient';
 export { PendingOrdersSection } from './PendingOrdersSection';
 export { WarningsSection } from './WarningsSection';
+export { PendingTopupsSection } from './PendingTopupsSection';
