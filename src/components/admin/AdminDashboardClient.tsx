@@ -35,6 +35,7 @@ interface RestockWarning {
   reason: string;
   detail: string | null;
   created_at: string;
+  categoryId: string;
   categoryName: string;
 }
 
