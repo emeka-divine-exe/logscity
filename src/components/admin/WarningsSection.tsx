@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
+import { toast } from 'sonner';
 
 interface RestockWarning {
   id: string;
   reason: string;
   detail: string | null;
   created_at: string;
+  categoryId: string;
   categoryName: string;
 }
 
@@ -25,6 +27,7 @@ interface WarningsSectionProps {
 
 export function WarningsSection({ restockWarnings, unmatchedPayments }: WarningsSectionProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [retryingId, setRetryingId] = useState<string | null>(null);
 
   const visibleRestockWarnings = restockWarnings.filter((w) => !dismissed.has(w.id));
   const visibleUnmatchedPayments = unmatchedPayments.filter((p) => !dismissed.has(p.id));
@@ -36,6 +39,20 @@ export function WarningsSection({ restockWarnings, unmatchedPayments }: Warnings
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source }),
     });
+  }
+
+  async function retryRestock(warningId: string, categoryId: string) {
+    setRetryingId(warningId);
+    const res = await fetch(`/api/admin/restock/${categoryId}`, { method: 'POST' });
+    const data = await res.json();
+    setRetryingId(null);
+
+    if (data.success) {
+      toast.success(`Restocked — ${data.added} accounts added`);
+      setDismissed((prev) => new Set(prev).add(warningId));
+    } else {
+      toast.error('Still could not restock — check EmonBestLog balance');
+    }
   }
 
   if (visibleRestockWarnings.length === 0 && visibleUnmatchedPayments.length === 0) {
@@ -53,9 +70,9 @@ export function WarningsSection({ restockWarnings, unmatchedPayments }: Warnings
         {visibleRestockWarnings.map((warning) => (
           <div
             key={warning.id}
-            className="flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-background/40 p-3"
+            className="flex flex-col gap-3 rounded-xl border border-white/10 bg-background/40 p-3 sm:flex-row sm:items-start sm:justify-between"
           >
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-white">
                 Restock failed — {warning.categoryName}
               </p>
@@ -64,12 +81,21 @@ export function WarningsSection({ restockWarnings, unmatchedPayments }: Warnings
                 {new Date(warning.created_at).toLocaleString()}
               </p>
             </div>
-            <button
-              onClick={() => resolve(warning.id, 'restock')}
-              className="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/5"
-            >
-              Dismiss
-            </button>
+            <div className="flex shrink-0 gap-2">
+              <button
+                onClick={() => retryRestock(warning.id, warning.categoryId)}
+                disabled={retryingId === warning.id}
+                className="flex-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50 sm:flex-none"
+              >
+                {retryingId === warning.id ? 'Retrying...' : 'Restock Now'}
+              </button>
+              <button
+                onClick={() => resolve(warning.id, 'restock')}
+                className="flex-1 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/5 sm:flex-none"
+              >
+                Dismiss
+              </button>
+            </div>
           </div>
         ))}
 
@@ -101,4 +127,4 @@ export function WarningsSection({ restockWarnings, unmatchedPayments }: Warnings
       </div>
     </div>
   );
-                                      }
+}
