@@ -5,7 +5,7 @@ import { buyFromEmonBestLog, getEmonBestLogBalance, EmonBestLogError } from './c
 export async function maybeAutoRestock(categoryId: string) {
   const { data: category } = await supabaseAdmin
     .from('categories')
-    .select('id, name, emonbestlog_product_id, restock_quantity, low_stock_threshold')
+    .select('id, name, emonbestlog_product_id, restock_quantity, low_stock_threshold, cost_price')
     .eq('id', categoryId)
     .single();
 
@@ -26,13 +26,7 @@ export async function maybeAutoRestock(categoryId: string) {
   try {
     const emonBalance = await getEmonBestLogBalance();
 
-    const { data: product } = await supabaseAdmin
-      .from('categories')
-      .select('price')
-      .eq('id', categoryId)
-      .single();
-
-    const estimatedCost = Number(product?.price ?? 0) * category.restock_quantity;
+    const estimatedCost = Number(category.cost_price ?? 0) * category.restock_quantity;
     if (emonBalance < estimatedCost) {
       await supabaseAdmin.from('restock_warnings').insert({
         category_id: categoryId,
