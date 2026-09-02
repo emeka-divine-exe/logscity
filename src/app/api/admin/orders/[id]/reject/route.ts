@@ -10,9 +10,37 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { id } = await params;
 
-  const { error } = await supabaseAdmin.from('orders').delete().eq('id', id).eq('payment_status', 'pending');
+  const { data: order } = await supabaseAdmin
+    .from('orders')
+    .select('id, profile_id, total_amount, payment_status')
+    .eq('id', id)
+    .single();
 
-  if (error) {
+  if (!order) {
+    return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+  }
+  if (order.payment_status !== 'pending') {
+    return NextResponse.json({ error: 'This order was already resolved' }, { status: 409 });
+  }
+
+  const { error: refundError } = await supabaseAdmin.rpc('credit_wallet', {
+    p_profile_id: order.profile_id,
+    p_amount: order.total_amount,
+    p_reference: `reject-refund-${order.id}`,
+  });
+
+  if (refundError) {
+    console.error('Refund on reject failed:', refundError);
+    return NextResponse.json({ error: 'Failed to refund customer' }, { status: 500 });
+  }
+
+  const { error: updateError } = await supabaseAdmin
+    .from('orders')
+    .update({ payment_status: 'failed' })
+    .eq('id', id);
+
+  if (updateError) {
+    console.error('Failed to mark order as failed:', updateError);
     return NextResponse.json({ error: 'Failed to reject order' }, { status: 500 });
   }
 
