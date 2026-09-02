@@ -72,7 +72,7 @@ export default async function AdminDashboardPage() {
 
   const { data: restockWarningsRaw } = await supabaseAdmin
     .from('restock_warnings')
-    .select('id, reason, detail, created_at, categories ( name )')
+    .select('id, reason, detail, created_at, category_id, categories ( name )')
     .eq('resolved', false)
     .order('created_at', { ascending: false });
 
@@ -83,10 +83,10 @@ export default async function AdminDashboardPage() {
       reason: w.reason,
       detail: w.detail,
       created_at: w.created_at,
+      categoryId: w.category_id,
       categoryName: (category as { name: string } | null)?.name ?? 'Unknown category',
     };
   });
-
   const { data: unmatchedPayments } = await supabaseAdmin
     .from('unmatched_sms_payments')
     .select('id, amount, raw_sms, created_at')
