@@ -10,9 +10,6 @@ interface FulfillOrderParams {
   priceEach: number;
 }
 
-// The single place stock actually gets claimed and restock gets checked —
-// called by WhatsApp-manual checkout today, and by wallet-instant checkout
-// once Track A ships. Neither path needs its own restock logic.
 export async function fulfillOrder({
   orderId,
   categoryId,
@@ -37,7 +34,18 @@ export async function fulfillOrder({
     if (error) throw error;
   }
 
-  await supabaseAdmin.from('orders').update({ payment_status: 'success' }).eq('id', orderId);
+  const { error: statusError } = await supabaseAdmin
+    .from('orders')
+    .update({ payment_status: 'paid' })
+    .eq('id', orderId);
+
+  if (statusError) {
+    console.error('Failed to mark order as paid after claiming accounts', {
+      orderId,
+      statusError,
+    });
+    throw statusError;
+  }
 
   maybeAutoRestock(categoryId).catch((err) =>
     console.error('maybeAutoRestock threw unexpectedly', err)
