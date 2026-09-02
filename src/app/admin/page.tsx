@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
       profiles ( full_name ),
       order_items ( id )
     `)
-    .eq('payment_status', 'paid');
+    .eq('payment_status', 'paid')
     .order('created_at', { ascending: false })
     .limit(50);
 
