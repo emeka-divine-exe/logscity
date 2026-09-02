@@ -27,7 +27,7 @@ export default async function AdminDashboardPage() {
   const { data: orders } = await supabaseAdmin
     .from('orders')
     .select('total_amount, payment_status')
-    .eq('payment_status', 'success');
+    .eq('payment_status', 'paid');
 
   const totalAmount = orders?.reduce((sum, o) => sum + Number(o.total_amount), 0) ?? 0;
 
@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
       profiles ( full_name ),
       order_items ( id )
     `)
-    .eq('payment_status', 'success')
+    .eq('payment_status', 'paid');
     .order('created_at', { ascending: false })
     .limit(50);
 
