@@ -35,6 +35,14 @@ export default async function TopUpPage() {
     .eq('status', 'pending')
     .eq('marked_sent', true);
 
+  const { data: rejectedTx } = await supabase
+    .from('pending_topups')
+    .select('id, exact_amount, created_at')
+    .eq('profile_id', profile?.id)
+    .eq('status', 'rejected')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
   const combinedHistory = [
     ...(completedTx ?? []).map((tx) => ({
       id: tx.id,
@@ -51,6 +59,14 @@ export default async function TopUpPage() {
       balance_after: null,
       created_at: tx.created_at,
       status: 'pending' as const,
+    })),
+    ...(rejectedTx ?? []).map((tx) => ({
+      id: tx.id,
+      type: 'topup',
+      amount: Number(tx.exact_amount),
+      balance_after: null,
+      created_at: tx.created_at,
+      status: 'rejected' as const,
     })),
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
