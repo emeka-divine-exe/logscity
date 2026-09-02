@@ -26,7 +26,7 @@ export default async function OrdersPage() {
       )
     `)
     .eq('profile_id', profile?.id)
-    .in('payment_status', ['success', 'pending'])
+    .in('payment_status', ['paid', 'pending'])
     .order('created_at', { ascending: false });
 
   const orders = (rawOrders ?? []).map((order) => ({
