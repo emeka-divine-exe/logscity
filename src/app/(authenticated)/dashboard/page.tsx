@@ -16,7 +16,7 @@ export default async function DashboardPage() {
     .from('orders')
     .select('id, total_amount, payment_status, created_at')
     .eq('profile_id', profile?.id)
-    .eq('payment_status', 'success')
+    .eq('payment_status', 'paid');
     .order('created_at', { ascending: false });
 
   const totalOrders = orders?.length ?? 0;
