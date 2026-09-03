@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { toast } from 'sonner';
 
@@ -26,19 +27,30 @@ interface WarningsSectionProps {
 }
 
 export function WarningsSection({ restockWarnings, unmatchedPayments }: WarningsSectionProps) {
+  const router = useRouter();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [dismissingId, setDismissingId] = useState<string | null>(null);
 
   const visibleRestockWarnings = restockWarnings.filter((w) => !dismissed.has(w.id));
   const visibleUnmatchedPayments = unmatchedPayments.filter((p) => !dismissed.has(p.id));
 
   async function resolve(id: string, source: 'restock' | 'sms') {
-    setDismissed((prev) => new Set(prev).add(id));
-    await fetch(`/api/admin/warnings/${id}/resolve`, {
+    setDismissingId(id);
+    const res = await fetch(`/api/admin/warnings/${id}/resolve`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source }),
     });
+    setDismissingId(null);
+
+    if (!res.ok) {
+      toast.error('Could not dismiss — please try again');
+      return;
+    }
+
+    setDismissed((prev) => new Set(prev).add(id));
+    router.refresh();
   }
 
   async function retryRestock(warningId: string, categoryId: string) {
@@ -50,8 +62,10 @@ export function WarningsSection({ restockWarnings, unmatchedPayments }: Warnings
     if (data.success) {
       toast.success(`Restocked — ${data.added} accounts added`);
       setDismissed((prev) => new Set(prev).add(warningId));
+      router.refresh();
     } else {
-      toast.error('Still could not restock — check EmonBestLog balance');
+      toast.error('Still could not restock — check the newest warning below for the real reason');
+      router.refresh();
     }
   }
 
@@ -70,30 +84,30 @@ export function WarningsSection({ restockWarnings, unmatchedPayments }: Warnings
         {visibleRestockWarnings.map((warning) => (
           <div
             key={warning.id}
-            className="flex flex-col gap-3 rounded-xl border border-white/10 bg-background/40 p-3 sm:flex-row sm:items-start sm:justify-between"
+            className="rounded-xl border border-white/10 bg-background/40 p-3"
           >
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-white">
-                Restock failed — {warning.categoryName}
-              </p>
-              <p className="mt-1 text-xs text-neutral">{warning.detail}</p>
-              <p className="mt-1 text-xs text-neutral">
-                {new Date(warning.created_at).toLocaleString()}
-              </p>
-            </div>
-            <div className="flex shrink-0 gap-2">
+            <p className="text-sm font-medium text-white">
+              Restock failed — {warning.categoryName}
+            </p>
+            <p className="mt-1 text-xs text-neutral">{warning.detail}</p>
+            <p className="mt-1 text-xs text-neutral">
+              {new Date(warning.created_at).toLocaleString()}
+            </p>
+
+            <div className="mt-3 grid grid-cols-2 gap-2">
               <button
                 onClick={() => retryRestock(warning.id, warning.categoryId)}
-                disabled={retryingId === warning.id}
-                className="flex-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50 sm:flex-none"
+                disabled={retryingId === warning.id || dismissingId === warning.id}
+                className="w-full rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
               >
                 {retryingId === warning.id ? 'Retrying...' : 'Restock Now'}
               </button>
               <button
                 onClick={() => resolve(warning.id, 'restock')}
-                className="flex-1 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/5 sm:flex-none"
+                disabled={retryingId === warning.id || dismissingId === warning.id}
+                className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm text-white hover:bg-white/5 disabled:opacity-50"
               >
-                Dismiss
+                {dismissingId === warning.id ? 'Dismissing...' : 'Dismiss'}
               </button>
             </div>
           </div>
@@ -102,25 +116,24 @@ export function WarningsSection({ restockWarnings, unmatchedPayments }: Warnings
         {visibleUnmatchedPayments.map((payment) => (
           <div
             key={payment.id}
-            className="flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-background/40 p-3"
+            className="rounded-xl border border-white/10 bg-background/40 p-3"
           >
-            <div>
-              <p className="text-sm font-medium text-white">
-                Unmatched payment — ₦{Number(payment.amount).toLocaleString()}
-              </p>
-              <p className="mt-1 text-xs text-neutral">
-                Received via SMS but no pending top-up matched this exact amount. Check who might
-                have sent this and credit manually if needed.
-              </p>
-              <p className="mt-1 text-xs text-neutral">
-                {new Date(payment.created_at).toLocaleString()}
-              </p>
-            </div>
+            <p className="text-sm font-medium text-white">
+              Unmatched payment — ₦{Number(payment.amount).toLocaleString()}
+            </p>
+            <p className="mt-1 text-xs text-neutral">
+              Received via SMS but no pending top-up matched this exact amount. Check who might
+              have sent this and credit manually if needed.
+            </p>
+            <p className="mt-1 text-xs text-neutral">
+              {new Date(payment.created_at).toLocaleString()}
+            </p>
             <button
               onClick={() => resolve(payment.id, 'sms')}
-              className="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/5"
+              disabled={dismissingId === payment.id}
+              className="mt-3 w-full rounded-lg border border-white/10 px-3 py-2 text-sm text-white hover:bg-white/5 disabled:opacity-50"
             >
-              Dismiss
+              {dismissingId === payment.id ? 'Dismissing...' : 'Dismiss'}
             </button>
           </div>
         ))}
