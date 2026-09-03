@@ -58,10 +58,10 @@ export async function maybeAutoRestock(categoryId: string) {
     const newAccounts = result.keys.map((key) => ({
       category_id: categoryId,
       raw_key: key,
+      password: key,
       status: 'available' as const,
       source: 'emonbestlog' as const,
     }));
-
     const { error: insertError } = await supabaseAdmin.from('accounts').insert(newAccounts);
     if (insertError) {
       console.error('Account insert failed during restock', { categoryId, insertError });
