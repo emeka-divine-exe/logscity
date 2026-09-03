@@ -37,20 +37,26 @@ export function WarningsSection({ restockWarnings, unmatchedPayments }: Warnings
 
   async function resolve(id: string, source: 'restock' | 'sms') {
     setDismissingId(id);
-    const res = await fetch(`/api/admin/warnings/${id}/resolve`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source }),
-    });
-    setDismissingId(null);
+    try {
+      const res = await fetch(`/api/admin/warnings/${id}/resolve`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source }),
+      });
+      setDismissingId(null);
 
-    if (!res.ok) {
-      toast.error('Could not dismiss — please try again');
-      return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        toast.error(`Dismiss failed (${res.status}): ${data?.error ?? 'unknown reason'}`);
+        return;
+      }
+
+      setDismissed((prev) => new Set(prev).add(id));
+      router.refresh();
+    } catch (err) {
+      setDismissingId(null);
+      toast.error(`Network error: ${err instanceof Error ? err.message : String(err)}`);
     }
-
-    setDismissed((prev) => new Set(prev).add(id));
-    router.refresh();
   }
 
   async function retryRestock(warningId: string, categoryId: string) {
