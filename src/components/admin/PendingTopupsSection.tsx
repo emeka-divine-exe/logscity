@@ -29,10 +29,9 @@ export function PendingTopupsSection({ topups }: PendingTopupsSectionProps) {
 
     if (!res.ok) {
       const data = await res.json().catch(() => null);
-      toast.error(data?.error ?? `Failed to ${action}`);
+      toast.error(`${action} failed (${res.status}): ${data?.error ?? 'unknown reason'}`);
       return;
     }
-
     setResolved((prev) => new Set(prev).add(id));
     toast.success(action === 'approve' ? 'Wallet credited' : 'Marked as rejected');
   }
