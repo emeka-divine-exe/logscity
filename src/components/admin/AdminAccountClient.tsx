@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@iconify/react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui';
 import { CategoryFormModal } from './CategoryFormModal';
 import { AccountsManageModal } from './AccountsManageModal';
@@ -29,9 +30,29 @@ export function AvailableAccountsClient({ categories }: AvailableAccountsClientP
   const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
   const [manageCategory, setManageCategory] = useState<{ id: string; name: string } | null>(null);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
+  const [restockingId, setRestockingId] = useState<string | null>(null);
 
   function handleRefresh() {
     router.refresh();
+  }
+
+  async function handleRestock(categoryId: string, categoryName: string) {
+    setRestockingId(categoryId);
+    try {
+      const res = await fetch(`/api/admin/restock/${categoryId}`, { method: 'POST' });
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success(`${categoryName}: restocked ${data.added} accounts`);
+        router.refresh();
+      } else {
+        toast.error(`${categoryName}: could not restock — check Needs Attention for the reason`);
+      }
+    } catch (err) {
+      toast.error(`Restock request failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setRestockingId(null);
+    }
   }
 
   const grouped = useMemo(() => {
@@ -91,12 +112,21 @@ export function AvailableAccountsClient({ categories }: AvailableAccountsClientP
                       ₦{category.price.toLocaleString()} · {category.available} Available
                     </p>
                   </div>
-                  <button
-                    onClick={() => setManageCategory({ id: category.id, name: category.name })}
-                    className="rounded-lg border border-white/10 px-4 py-1.5 text-sm text-white hover:bg-white/5"
-                  >
-                    Edit
-                  </button>
+                  <div className="flex shrink-0 gap-2">
+                    <button
+                      onClick={() => handleRestock(category.id, category.name)}
+                      disabled={restockingId === category.id}
+                      className="rounded-lg border border-primary/30 px-3 py-1.5 text-sm text-primary hover:bg-primary/10 disabled:opacity-50"
+                    >
+                      {restockingId === category.id ? 'Restocking...' : 'Restock'}
+                    </button>
+                    <button
+                      onClick={() => setManageCategory({ id: category.id, name: category.name })}
+                      className="rounded-lg border border-white/10 px-4 py-1.5 text-sm text-white hover:bg-white/5"
+                    >
+                      Edit
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
