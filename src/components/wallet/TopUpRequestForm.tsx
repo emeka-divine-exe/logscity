@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { toast } from 'sonner';
 
-const LOGSCITY_ACCOUNT_NUMBER = '6422643972';
-const LOGSCITY_BANK_NAME = 'OPay';
+const LOGSCITY_ACCOUNT_NUMBER = '2011100478';
+const LOGSCITY_BANK_NAME = 'Payrep MFB';
 const LOGSCITY_ACCOUNT_NAME = 'Darlyton Oseghale Egboshe';
 
 interface ActiveRequest {
