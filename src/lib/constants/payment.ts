@@ -1,7 +1,7 @@
 export const BANK_DETAILS = {
   accountName: 'Darlyton Oseghale Egboshe',
-  accountNumber: '6422643972',
-  bankName: 'Opay',
+  accountNumber: '2011100478',
+  bankName: 'Payrep MFB',
 };
 
 // TODO: replace with the real WhatsApp number — same one used in HelpModal
