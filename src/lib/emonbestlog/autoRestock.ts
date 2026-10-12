@@ -2,6 +2,12 @@ import 'server-only';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { buyFromEmonBestLog, getEmonBestLogBalance, EmonBestLogError } from './client';
 
+export interface RestockResult {
+  ok: boolean;
+  added: number;
+  reason?: string;
+}
+
 function extractErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   if (err && typeof err === 'object') {
@@ -16,15 +22,24 @@ function extractErrorMessage(err: unknown): string {
   return String(err);
 }
 
-export async function maybeAutoRestock(categoryId: string) {
+export async function maybeAutoRestock(
+  categoryId: string,
+  options?: { force?: boolean }
+): Promise<RestockResult> {
   const { data: category } = await supabaseAdmin
     .from('categories')
     .select('id, name, emonbestlog_product_id, restock_quantity, low_stock_threshold, cost_price')
     .eq('id', categoryId)
     .single();
 
-  if (!category?.emonbestlog_product_id || !category.restock_quantity) {
-    return;
+  if (!category) {
+    return { ok: false, added: 0, reason: 'Category not found' };
+  }
+  if (!category.emonbestlog_product_id) {
+    return { ok: false, added: 0, reason: 'No EmonBestLog product ID set on this category (tap Edit)' };
+  }
+  if (!category.restock_quantity) {
+    return { ok: false, added: 0, reason: 'No restock quantity set on this category (tap Edit)' };
   }
 
   const { count: availableCount } = await supabaseAdmin
@@ -33,21 +48,28 @@ export async function maybeAutoRestock(categoryId: string) {
     .eq('category_id', categoryId)
     .eq('status', 'available');
 
-  if ((availableCount ?? 0) >= category.low_stock_threshold) {
-    return;
+  if (!options?.force && (availableCount ?? 0) >= category.low_stock_threshold) {
+    return {
+      ok: false,
+      added: 0,
+      reason: `Stock (${availableCount ?? 0}) is not below the low-stock threshold (${category.low_stock_threshold})`,
+    };
   }
+
+  let keys: string[] = [];
 
   try {
     const emonBalance = await getEmonBestLogBalance();
 
     const estimatedCost = Number(category.cost_price ?? 0) * category.restock_quantity;
     if (emonBalance < estimatedCost) {
+      const detail = `EmonBestLog balance (₦${emonBalance}) is too low to restock "${category.name}" (needs ~₦${estimatedCost}).`;
       await supabaseAdmin.from('restock_warnings').insert({
         category_id: categoryId,
         reason: 'low_emonbestlog_balance',
-        detail: `EmonBestLog balance (₦${emonBalance}) is too low to restock "${category.name}" (needs ~₦${estimatedCost}).`,
+        detail,
       });
-      return;
+      return { ok: false, added: 0, reason: detail };
     }
 
     const result = await buyFromEmonBestLog(
@@ -55,28 +77,43 @@ export async function maybeAutoRestock(categoryId: string) {
       category.restock_quantity
     );
 
-    const newAccounts = result.keys.map((key) => ({
+    keys = Array.isArray(result.keys) ? result.keys : [];
+    if (keys.length === 0) {
+      throw new Error(
+        `EmonBestLog returned no keys. Raw response: ${JSON.stringify(result).slice(0, 300)}`
+      );
+    }
+
+    const newAccounts = keys.map((key) => ({
       category_id: categoryId,
       raw_key: key,
       password: key,
       status: 'available' as const,
       source: 'emonbestlog' as const,
     }));
+
     const { error: insertError } = await supabaseAdmin.from('accounts').insert(newAccounts);
     if (insertError) {
       console.error('Account insert failed during restock', { categoryId, insertError });
       throw insertError;
     }
+
+    return { ok: true, added: newAccounts.length };
   } catch (err) {
     const isBalanceError = err instanceof EmonBestLogError && err.status === 402;
     const message = extractErrorMessage(err);
+    const detail =
+      keys.length > 0
+        ? `${message} | PURCHASED BUT NOT SAVED. Recover these keys: ${keys.join(' | ')}`
+        : message;
 
     await supabaseAdmin.from('restock_warnings').insert({
       category_id: categoryId,
       reason: isBalanceError ? 'low_emonbestlog_balance' : 'restock_failed',
-      detail: message,
+      detail,
     });
 
     console.error('Auto-restock failed', { categoryId, error: err, extractedMessage: message });
+    return { ok: false, added: 0, reason: message };
   }
 }
