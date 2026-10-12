@@ -46,7 +46,7 @@ export function AvailableAccountsClient({ categories }: AvailableAccountsClientP
         toast.success(`${categoryName}: restocked ${data.added} accounts`);
         router.refresh();
       } else {
-        toast.error(`${categoryName}: could not restock — check Needs Attention for the reason`);
+        toast.error(`${categoryName}: ${data.reason ?? 'could not restock'}`);
       }
     } catch (err) {
       toast.error(`Restock request failed: ${err instanceof Error ? err.message : String(err)}`);
