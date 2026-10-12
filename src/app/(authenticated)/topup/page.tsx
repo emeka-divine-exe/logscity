@@ -60,6 +60,7 @@ export default async function TopUpPage() {
             accountNumber={account.accountNumber}
             accountName={account.accountName}
             bankName={account.bankName}
+            balance={Number(profile?.balance ?? 0)}
           />
         ) : (
           <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-sm text-red-400">
