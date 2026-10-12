@@ -70,7 +70,7 @@ export function WarningsSection({ restockWarnings, unmatchedPayments }: Warnings
       setDismissed((prev) => new Set(prev).add(warningId));
       router.refresh();
     } else {
-      toast.error('Still could not restock — check the newest warning below for the real reason');
+      toast.error(data.reason ?? 'Still could not restock');
       router.refresh();
     }
   }
