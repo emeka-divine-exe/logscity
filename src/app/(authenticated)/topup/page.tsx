@@ -1,7 +1,9 @@
 export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
-import { TransactionHistory, TopUpRequestForm } from '@/components/wallet';
+import { ensureCustomerAccount } from '@/lib/wallet/ensureCustomerAccount';
+import type { CustomerAccount } from '@/lib/paymonetra';
+import { TransactionHistory, TopUpAccountCard } from '@/components/wallet';
 
 export default async function TopUpPage() {
   const supabase = await createClient();
@@ -9,66 +11,34 @@ export default async function TopUpPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, balance')
+    .select('id, full_name, balance, pm_account_number, pm_account_name, pm_bank_name')
     .eq('auth_user_id', user!.id)
     .single();
 
-  const { data: activeRequest } = await supabase
-    .from('pending_topups')
-    .select('id, exact_amount, expires_at, marked_sent')
-    .eq('profile_id', profile?.id)
-    .eq('status', 'pending')
-    .gt('expires_at', new Date().toISOString())
-    .single();
+  let account: CustomerAccount | null = null;
+  if (profile) {
+    try {
+      account = await ensureCustomerAccount(profile);
+    } catch (err) {
+      console.error('Could not get customer account', err);
+    }
+  }
 
-  const { data: completedTx } = await supabase
+  const { data: txs } = await supabase
     .from('wallet_transactions')
     .select('id, type, amount, balance_after, created_at')
     .eq('profile_id', profile?.id)
     .order('created_at', { ascending: false })
     .limit(50);
 
-  const { data: pendingTx } = await supabase
-    .from('pending_topups')
-    .select('id, exact_amount, created_at')
-    .eq('profile_id', profile?.id)
-    .eq('status', 'pending')
-    .eq('marked_sent', true);
-
-  const { data: rejectedTx } = await supabase
-    .from('pending_topups')
-    .select('id, exact_amount, created_at')
-    .eq('profile_id', profile?.id)
-    .eq('status', 'rejected')
-    .order('created_at', { ascending: false })
-    .limit(10);
-
-  const combinedHistory = [
-    ...(completedTx ?? []).map((tx) => ({
-      id: tx.id,
-      type: tx.type,
-      amount: Number(tx.amount),
-      balance_after: Number(tx.balance_after),
-      created_at: tx.created_at,
-      status: 'completed' as const,
-    })),
-    ...(pendingTx ?? []).map((tx) => ({
-      id: tx.id,
-      type: 'topup',
-      amount: Number(tx.exact_amount),
-      balance_after: null,
-      created_at: tx.created_at,
-      status: 'pending' as const,
-    })),
-    ...(rejectedTx ?? []).map((tx) => ({
-      id: tx.id,
-      type: 'topup',
-      amount: Number(tx.exact_amount),
-      balance_after: null,
-      created_at: tx.created_at,
-      status: 'rejected' as const,
-    })),
-  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const history = (txs ?? []).map((tx) => ({
+    id: tx.id,
+    type: tx.type,
+    amount: Number(tx.amount),
+    balance_after: Number(tx.balance_after),
+    created_at: tx.created_at,
+    status: 'completed' as const,
+  }));
 
   return (
     <div>
@@ -85,24 +55,23 @@ export default async function TopUpPage() {
       </div>
 
       <div className="mt-6">
-        <TopUpRequestForm
-          initialRequest={
-            activeRequest
-              ? {
-                  id: activeRequest.id,
-                  exactAmount: activeRequest.exact_amount,
-                  expiresAt: activeRequest.expires_at,
-                  markedSent: activeRequest.marked_sent,
-                }
-              : null
-          }
-        />
+        {account ? (
+          <TopUpAccountCard
+            accountNumber={account.accountNumber}
+            accountName={account.accountName}
+            bankName={account.bankName}
+          />
+        ) : (
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-sm text-red-400">
+            We couldn&apos;t load your payment details right now. Please refresh, or contact support.
+          </div>
+        )}
       </div>
 
       <div className="mt-10">
         <h2 className="text-lg font-semibold text-white">Transaction History</h2>
         <div className="mt-4">
-          <TransactionHistory transactions={combinedHistory} />
+          <TransactionHistory transactions={history} />
         </div>
       </div>
     </div>
